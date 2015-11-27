@@ -1782,25 +1782,34 @@ SV.UserFriction = function()
 	ent.v_float[PR.entvars.velocity2] *= newspeed;
 };
 
-SV.Accelerate = function(wishvel, air)
+SV.Accelerate = function(wishvel, air, wishdir, wishspeed)
 {
-	var ent = SV.player;
-	var wishdir = [wishvel[0], wishvel[1], wishvel[2]];
-	var wishspeed = Vec.Normalize(wishdir);
-	if ((air === true) && (wishspeed > 30.0))
-		wishspeed = 30.0;
-	var addspeed = wishspeed - (ent.v_float[PR.entvars.velocity] * wishdir[0]
-		+ ent.v_float[PR.entvars.velocity1] * wishdir[1]
-		+ ent.v_float[PR.entvars.velocity2] * wishdir[2]
-	);
-	if (addspeed <= 0.0)
+    var wishAir, addspeed, ent = SV.player;;
+    if(air){
+        wishAir = Vec.Normalize (wishvel);
+        if (wishAir > 30)
+            wishAir = 30;
+            
+        addspeed = wishAir - (ent.v_float[PR.entvars.velocity] * wishvel[0]
+            + ent.v_float[PR.entvars.velocity1] * wishvel[1]
+            + ent.v_float[PR.entvars.velocity2] * wishvel[2]);
+
+    } else {        
+        addspeed = wishspeed - (ent.v_float[PR.entvars.velocity] * wishdir[0]
+            + ent.v_float[PR.entvars.velocity1] * wishdir[1]
+            + ent.v_float[PR.entvars.velocity2] * wishdir[2]);
+    }
+	if (addspeed <= 0)
 		return;
-	var accelspeed = SV.accelerate.value * Host.frametime * wishspeed;
+	accelspeed = SV.accelerate.value*Host.frametime*wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
-	ent.v_float[PR.entvars.velocity] += accelspeed * wishdir[0];
-	ent.v_float[PR.entvars.velocity1] += accelspeed * wishdir[1];
-	ent.v_float[PR.entvars.velocity2] += accelspeed * wishdir[2];
+        
+    var velToMult = air ? wishvel : wishdir;
+    
+	ent.v_float[PR.entvars.velocity] += accelspeed * velToMult[0];
+	ent.v_float[PR.entvars.velocity1] += accelspeed * velToMult[1];
+	ent.v_float[PR.entvars.velocity2] += accelspeed * velToMult[2];
 };
 
 SV.WaterMove = function()
@@ -1874,31 +1883,40 @@ SV.AirMove = function()
 	var ent = SV.player;
 	var cmd = Host.client.cmd;
 	var forward = [], right = [];
+    
 	Vec.AngleVectors(ED.Vector(ent, PR.entvars.angles), forward, right);
+    
 	var fmove = cmd.forwardmove;
 	var smove = cmd.sidemove;
+    
 	if ((SV.server.time < ent.v_float[PR.entvars.teleport_time]) && (fmove < 0.0))
 		fmove = 0.0;
+        
 	var wishvel = [
 		forward[0] * fmove + right[0] * smove,
 		forward[1] * fmove + right[1] * smove,
-		((ent.v_float[PR.entvars.movetype] >> 0) !== SV.movetype.walk) ? cmd.upmove : 0.0];
-	var wishdir = [wishvel[0], wishvel[1], wishvel[2]];
-	if (Vec.Normalize(wishdir) > SV.maxspeed.value)
+		((ent.v_float[PR.entvars.movetype] >> 0) !== SV.movetype.walk) ? cmd.upmove : 0.0];    
+    
+	var wishdir = [wishvel[0], wishvel[1], wishvel[2]],
+        wishspeed = Vec.Normalize(wishdir);
+    var scaler = (SV.maxspeed.value / wishspeed);
+	if (wishspeed > SV.maxspeed.value)
 	{
-		wishvel[0] = wishdir[0] * SV.maxspeed.value;
-		wishvel[1] = wishdir[1] * SV.maxspeed.value;
-		wishvel[2] = wishdir[2] * SV.maxspeed.value;
+		wishvel[0] = wishvel[0] * scaler;
+		wishvel[1] = wishvel[1] * scaler;
+		wishvel[2] = wishvel[2] * scaler;
+		wishspeed = SV.maxspeed.value;
 	}
+    
 	if (ent.v_float[PR.entvars.movetype] === SV.movetype.noclip)
 		ED.SetVector(ent, PR.entvars.velocity, wishvel);
 	else if ((ent.v_float[PR.entvars.flags] & SV.fl.onground) !== 0)
 	{
 		SV.UserFriction(wishvel);
-		SV.Accelerate(wishvel);
+		SV.Accelerate(wishvel, false, wishdir, wishspeed);
 	}
 	else
-		SV.Accelerate(wishvel, true);
+		SV.Accelerate(wishvel, true, wishdir, wishspeed);
 };
 
 SV.ClientThink = function()
