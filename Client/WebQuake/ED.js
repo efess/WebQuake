@@ -175,7 +175,7 @@ ED.Count = function()
 	Con.Print('step      :' + (step <= 9 ? '  ' : (step <= 99 ? ' ' : '')) + step + '\n');
 };
 
-ED.ParseGlobals = function(data)
+ED.ParseGlobals = async function(data)
 {
 	var keyname, key;
 	for (;;)
@@ -198,7 +198,7 @@ ED.ParseGlobals = function(data)
 			continue;
 		}
 		if (ED.ParseEpair(PR.globals, key, COM.token) !== true)
-			Host.Error('ED.ParseGlobals: parse error');
+			await Host.Error('ED.ParseGlobals: parse error');
 	}
 };
 
@@ -262,7 +262,7 @@ ED.ParseEpair = function(base, key, s)
 	return true;
 };
 
-ED.ParseEdict = function(data, ent)
+ED.ParseEdict = async function(data, ent)
 {
 	var i, init, anglehack, keyname, n, key;
 	if (ent !== SV.server.edicts[0])
@@ -311,7 +311,7 @@ ED.ParseEdict = function(data, ent)
 		if (anglehack == true)
 			COM.token = '0 ' + COM.token + ' 0';
 		if (ED.ParseEpair(ent.v, key, COM.token) !== true)
-			Host.Error('ED.ParseEdict: parse error');
+			await Host.Error('ED.ParseEdict: parse error');
 	}
 	if (init !== true)
 		ent.free = true;
@@ -335,7 +335,7 @@ ED.LoadFromFile = async function(data)
 			ent = SV.server.edicts[0];
 		else
 			ent = ED.Alloc();
-		data = ED.ParseEdict(data, ent);
+		data = await ED.ParseEdict(data, ent);
 
 		spawnflags = ent.v_float[PR.entvars.spawnflags] >> 0;
 		if (Host.deathmatch.value !== 0)

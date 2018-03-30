@@ -53,18 +53,52 @@ COM.LoadFileAsync
       - PF.precache_model
         (added to PF.builtin array)
           - PR.ExecuteProgram 
-            - ED.LoadFromFile --------------- I"M HERE.
+            -~ED.LoadFromFile
             - Host.DropClient
-            - Host.Kill_f
-            - Host.Spawn_f
+              - Host.ShutdownServer
+                - CL.Disconnect
+                  -~Host.EndGame
+                  -~Host.Demos_f
+                  -~Host.Stopdemo_f
+                  - CL.EstablishConnection
+                    -~Host.Connect_f
+                  - CL.SendMove
+                    -~CL.SendCmd 
+                - Host.Error
+                  -~CL.SendCmd
+                  -~CL.KeepaliveMessage
+                  - ED.ParseGlobals - No Refs
+                  -~ED.ParseEdict
+                  -~NET.CheckForResend
+                  -~PF.objerror
+                  -~PF.error
+                  - PR.RunError
+                    -~PF.SetMinMaxSize
+                    -~PF.WriteDest
+                    -~PR.CheckEmptyString
+                    -~PR.EnterFunction
+                    -~PR.LeaveFunction
+              -~Host.Kick_f 
+              -~SV.SendClientDatagram
+              -~SV.SendClientMessages
+            -~Host.Kill_f
+            -~Host.Spawn_f
             - SV.ConnectClient
-            - SV.SaveSpawnparms
+              -~SV.CheckForNewClients
+            -~SV.SaveSpawnparms
             - SV.RunThink
+              -~SV.Physics_Noclip
+              -~SV.Physics_Toss
+              -~SV.Physics_Step
             - SV.Impact
-            - SV.PushMove
-            - SV.Physics_Pusher
-            - SV.Physics_Client
-            - SV.Physics
+              - SV.FlyMove
+                -~SV.TryUnstick
+                -~SV.WalkMove
+              -~SV.PushEntity
+            -~SV.PushMove
+            -~SV.Physics_Pusher
+            -~SV.Physics_Client
+            -~SV.Physics
             - SV.TouchLinks
   - PR.LoadProgs
   - S.LoadSound

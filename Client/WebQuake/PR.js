@@ -204,7 +204,7 @@ PR.CheckEmptyString = function(s)
 {
 	var c = s.charCodeAt(0);
 	if ((Q.isNaN(c) === true) || (c <= 32))
-		PR.RunError('Bad string');
+		await PR.RunError('Bad string');
 };
 
 // edict
@@ -554,20 +554,20 @@ PR.Profile_f = function()
 	}
 };
 
-PR.RunError = function(error)
+PR.RunError = async function(error)
 {
 	PR.PrintStatement(PR.statements[PR.xstatement]);
 	PR.StackTrace();
 	Con.Print(error + '\n');
-	Host.Error('Program error');
+	await Host.Error('Program error');
 };
 
-PR.EnterFunction = function(f)
+PR.EnterFunction = async function(f)
 {
 	PR.stack[PR.depth++] = [PR.xstatement, PR.xfunction];
 	var c = f.locals;
 	if ((PR.localstack_used + c) > PR.localstack_size)
-		PR.RunError('PR.EnterFunction: locals stack overflow\n');
+		await PR.RunError('PR.EnterFunction: locals stack overflow\n');
 	var i;
 	for (i = 0; i < c; ++i)
 		PR.localstack[PR.localstack_used + i] = PR.globals_int[f.parm_start + i];
@@ -582,14 +582,14 @@ PR.EnterFunction = function(f)
 	return f.first_statement - 1;
 };
 
-PR.LeaveFunction = function()
+PR.LeaveFunction = async function()
 {
 	if (PR.depth <= 0)
 		Sys.Error('prog stack underflow');
 	var c = PR.xfunction.locals;
 	PR.localstack_used -= c;
 	if (PR.localstack_used < 0)
-		PR.RunError('PR.LeaveFunction: locals stack underflow\n');
+		await PR.RunError('PR.LeaveFunction: locals stack underflow\n');
 	for (--c; c >= 0; --c)
 		PR.globals_int[PR.xfunction.parm_start + c] = PR.localstack[PR.localstack_used + c];
 	PR.xfunction = PR.stack[--PR.depth][1];
@@ -602,12 +602,12 @@ PR.ExecuteProgram = async function(fnum)
 	{
 		if (PR.globals_int[PR.globalvars.self] !== 0)
 			ED.Print(SV.server.edicts[PR.globals_int[PR.globalvars.self]]);
-		Host.Error('PR.ExecuteProgram: NULL function');
+		await Host.Error('PR.ExecuteProgram: NULL function');
 	}
 	var runaway = 100000;
 	PR.trace = false;
 	var exitdepth = PR.depth;
-	var s = PR.EnterFunction(PR.functions[fnum]);
+	var s = await PR.EnterFunction(PR.functions[fnum]);
 	var st, ed, ptr, newf;
 
 	for (;;)
@@ -615,7 +615,7 @@ PR.ExecuteProgram = async function(fnum)
 		++s;
 		st = PR.statements[s];
 		if (--runaway === 0)
-			PR.RunError('runaway loop error');
+			await PR.RunError('runaway loop error');
 		++PR.xfunction.profile;
 		PR.xstatement = s;
 		if (PR.trace === true)
@@ -761,7 +761,7 @@ PR.ExecuteProgram = async function(fnum)
 		case PR.op.address:
 			ed = PR.globals_int[st.a];
 			if ((ed === 0) && (SV.server.loading !== true))
-				PR.RunError('assignment to world entity');
+				await PR.RunError('assignment to world entity');
 			PR.globals_int[st.c] = ed * PR.edict_size + 96 + (PR.globals_int[st.b] << 2);
 			continue;
 		case PR.op.load_f:
@@ -800,24 +800,24 @@ PR.ExecuteProgram = async function(fnum)
 		case PR.op.call8:
 			PR.argc = st.op - PR.op.call0;
 			if (PR.globals_int[st.a] === 0)
-				PR.RunError('NULL function');
+				await PR.RunError('NULL function');
 			newf = PR.functions[PR.globals_int[st.a]];
 			if (newf.first_statement < 0)
 			{
 				ptr = -newf.first_statement;
 				if (ptr >= PF.builtin.length)
-					PR.RunError('Bad builtin call number');
+					await PR.RunError('Bad builtin call number');
 				await PF.builtin[ptr]();
 				continue;
 			}
-			s = PR.EnterFunction(newf);
+			s = await PR.EnterFunction(newf);
 			continue;
 		case PR.op.done:
 		case PR.op.ret:
 			PR.globals_int[1] = PR.globals_int[st.a];
 			PR.globals_int[2] = PR.globals_int[st.a + 1];
 			PR.globals_int[3] = PR.globals_int[st.a + 2];
-			s = PR.LeaveFunction();
+			s = await PR.LeaveFunction();
 			if (PR.depth === exitdepth)
 				return;
 			continue;
@@ -828,7 +828,7 @@ PR.ExecuteProgram = async function(fnum)
 			ed.v_int[PR.entvars.think] = PR.globals_int[st.b];
 			continue;
 		}
-		PR.RunError('Bad opcode ' + st.op);
+		await PR.RunError('Bad opcode ' + st.op);
 	}
 };
 

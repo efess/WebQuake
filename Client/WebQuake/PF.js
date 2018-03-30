@@ -8,18 +8,18 @@ PF.VarString = function(first)
 	return out;
 };
 
-PF.error = function()
+PF.error = async function()
 {
 	Con.Print('======SERVER ERROR in ' + PR.GetString(PR.xfunction.name) + '\n' + PF.VarString(0) + '\n');
 	ED.Print(SV.server.edicts[PR.globals_int[PR.globalvars.self]]);
-	Host.Error('Program error');
+	await Host.Error('Program error');
 };
 
-PF.objerror = function()
+PF.objerror = async function()
 {
 	Con.Print('======OBJECT ERROR in ' + PR.GetString(PR.xfunction.name) + '\n' + PF.VarString(0) + '\n');
 	ED.Print(SV.server.edicts[PR.globals_int[PR.globalvars.self]]);
-	Host.Error('Program error');
+	await Host.Error('Program error');
 };
 
 PF.makevectors = function()
@@ -41,19 +41,19 @@ PF.setorigin = function()
 	e.v_float[PR.entvars.origin] = PR.globals_float[7];
 	e.v_float[PR.entvars.origin1] = PR.globals_float[8];
 	e.v_float[PR.entvars.origin2] = PR.globals_float[9];
-	SV.LinkEdict(e);
+	await SV.LinkEdict(e);
 };
 
-PF.SetMinMaxSize = function(e, min, max)
+PF.SetMinMaxSize = async function(e, min, max)
 {
 	if ((min[0] > max[0]) || (min[1] > max[1]) || (min[2] > max[2]))
-		PR.RunError('backwards mins/maxs');
+		await PR.RunError('backwards mins/maxs');
 	ED.SetVector(e, PR.entvars.mins, min);
 	ED.SetVector(e, PR.entvars.maxs, max);
 	e.v_float[PR.entvars.size] = max[0] - min[0];
 	e.v_float[PR.entvars.size1] = max[1] - min[1];
 	e.v_float[PR.entvars.size2] = max[2] - min[2];
-	SV.LinkEdict(e);
+	await SV.LinkEdict(e);
 };
 
 PF.setsize = function()
@@ -74,15 +74,15 @@ PF.setmodel = function()
 			break;
 	}
 	if (i === SV.server.model_precache.length)
-		PR.RunError('no precache: ' + m + '\n');
+		await PR.RunError('no precache: ' + m + '\n');
 
 	e.v_int[PR.entvars.model] = PR.globals_int[7];
 	e.v_float[PR.entvars.modelindex] = i;
 	var mod = SV.server.models[i];
 	if (mod != null)
-		PF.SetMinMaxSize(e, mod.mins, mod.maxs);
+		await PF.SetMinMaxSize(e, mod.mins, mod.maxs);
 	else
-		PF.SetMinMaxSize(e, Vec.origin, Vec.origin);
+		await PF.SetMinMaxSize(e, Vec.origin, Vec.origin);
 };
 
 PF.bprint = function()
@@ -300,7 +300,7 @@ PF.stuffcmd = function()
 {
 	var entnum = PR.globals_int[4];
 	if ((entnum <= 0) || (entnum > SV.svs.maxclients))
-		PR.RunError('Parm 0 not a client');
+		await PR.RunError('Parm 0 not a client');
 	var client = SV.svs.clients[entnum - 1];
 	MSG.WriteByte(client.message, Protocol.svc.stufftext);
 	MSG.WriteString(client.message, PR.GetString(PR.globals_int[7]));
@@ -429,7 +429,7 @@ PF.precache_sound = function()
 {
 	var s = PR.GetString(PR.globals_int[4]);
 	PR.globals_int[1] = PR.globals_int[4];
-	PR.CheckEmptyString(s);
+	await PR.CheckEmptyString(s);
 	var i;
 	for (i = 0; i < SV.server.sound_precache.length; ++i)
 	{
@@ -442,10 +442,10 @@ PF.precache_sound = function()
 PF.precache_model = async function()
 {
 	if (SV.server.loading !== true)
-		PR.RunError('PF.Precache_*: Precache can only be done in spawn functions');
+		await PR.RunError('PF.Precache_*: Precache can only be done in spawn functions');
 	var s = PR.GetString(PR.globals_int[4]);
 	PR.globals_int[1] = PR.globals_int[4];
-	PR.CheckEmptyString(s);
+	await PR.CheckEmptyString(s);
 	var i;
 	for (i = 0; i < SV.server.model_precache.length; ++i)
 	{
@@ -504,7 +504,7 @@ PF.droptofloor = function()
 		return;
 	}
 	ED.SetVector(ent, PR.entvars.origin, trace.endpos);
-	SV.LinkEdict(ent);
+	await SV.LinkEdict(ent);
 	ent.v_float[PR.entvars.flags] |= SV.fl.onground;
 	ent.v_int[PR.entvars.groundentity] = trace.ent.num;
 	PR.globals_float[1] = 1.0;
@@ -663,7 +663,7 @@ PF.changeyaw = function()
 	ent.v_float[PR.entvars.angles1] = Vec.Anglemod(current + move);
 };
 
-PF.WriteDest = function()
+PF.WriteDest = async function()
 {
 	switch (PR.globals_float[4] >> 0)
 	{
@@ -672,24 +672,24 @@ PF.WriteDest = function()
 	case 1: // one
 		var entnum = PR.globals_int[PR.globalvars.msg_entity];
 		if ((entnum <= 0) || (entnum > SV.svs.maxclients))
-			PR.RunError('WriteDest: not a client');
+			await PR.RunError('WriteDest: not a client');
 		return SV.svs.clients[entnum - 1].message;
 	case 2: // all
 		return SV.server.reliable_datagram;
 	case 3: // init
 		return SV.server.signon;
 	}
-	PR.RunError('WriteDest: bad destination');
+	await PR.RunError('WriteDest: bad destination');
 };
 
-PF.WriteByte = function() {MSG.WriteByte(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteChar = function() {MSG.WriteChar(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteShort = function() {MSG.WriteShort(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteLong = function() {MSG.WriteLong(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteAngle = function() {MSG.WriteAngle(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteCoord = function() {MSG.WriteCoord(PF.WriteDest(), PR.globals_float[7]);};
-PF.WriteString = function() {MSG.WriteString(PF.WriteDest(), PR.GetString(PR.globals_int[7]));};
-PF.WriteEntity = function() {MSG.WriteShort(PF.WriteDest(), PR.globals_int[7]);};
+PF.WriteByte = async function() {MSG.WriteByte(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteChar = async function() {MSG.WriteChar(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteShort = async function() {MSG.WriteShort(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteLong = async function() {MSG.WriteLong(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteAngle = async function() {MSG.WriteAngle(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteCoord = async function() {MSG.WriteCoord(await PF.WriteDest(), PR.globals_float[7]);};
+PF.WriteString = async function() {MSG.WriteString(await PF.WriteDest(), PR.GetString(PR.globals_int[7]));};
+PF.WriteEntity = async function() {MSG.WriteShort(await PF.WriteDest(), PR.globals_int[7]);};
 
 PF.makestatic = function()
 {
@@ -713,7 +713,7 @@ PF.setspawnparms = function()
 {
 	var i = PR.globals_int[4];
 	if ((i <= 0) || (i > SV.svs.maxclients))
-		PR.RunError('Entity is not a client');
+		await PR.RunError('Entity is not a client');
 	var spawn_parms = SV.svs.clients[i - 1].spawn_parms;
 	for (i = 0; i <= 15; ++i)
 		PR.globals_float[PR.globalvars.parms + i] = spawn_parms[i];
@@ -729,7 +729,7 @@ PF.changelevel = function()
 
 PF.Fixme = function()
 {
-	PR.RunError('unimplemented builtin');
+	await PR.RunError('unimplemented builtin');
 };
 
 PF.builtin = [

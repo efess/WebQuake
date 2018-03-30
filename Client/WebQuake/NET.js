@@ -51,7 +51,7 @@ NET.Connect = function(host)
 	}
 };
 
-NET.CheckForResend = function()
+NET.CheckForResend = async function()
 {
 	NET.time = Sys.FloatTime();
 	var dfunc = NET.drivers[NET.newsocket.driver];
@@ -70,7 +70,7 @@ NET.CheckForResend = function()
 			NET.Close(NET.newsocket);
 			CL.cls.state = CL.active.disconnected;
 			Con.Print('No Response\n');
-			Host.Error('NET.CheckForResend: connect failed\n');
+			await Host.Error('NET.CheckForResend: connect failed\n');
 		}
 	}
 	var ret = dfunc.CheckForResend();
@@ -85,7 +85,7 @@ NET.CheckForResend = function()
 		NET.Close(NET.newsocket);
 		CL.cls.state = CL.active.disconnected;
 		Con.Print('Network Error\n');
-		Host.Error('NET.CheckForResend: connect failed\n');
+		await Host.Error('NET.CheckForResend: connect failed\n');
 	}
 };
 

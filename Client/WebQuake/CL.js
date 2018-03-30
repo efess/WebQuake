@@ -171,7 +171,7 @@ CL.PlayDemo_f = async function()
 		Con.Print('playdemo <demoname> : plays a demo\n');
 		return;
 	}
-	CL.Disconnect();
+	await CL.Disconnect();
 	var name = COM.DefaultExtension(Cmd.argv[1], '.dem');
 	Con.Print('Playing demo from ' + name + '.\n');
 	var demofile = await COM.LoadFileAsync(name);
@@ -407,7 +407,7 @@ CL.BaseMove = function()
 };
 
 CL.sendmovebuf = {data: new ArrayBuffer(16), cursize: 0};
-CL.SendMove = function()
+CL.SendMove = async function()
 {
 	var buf = CL.sendmovebuf;
 	buf.cursize = 0;
@@ -436,7 +436,7 @@ CL.SendMove = function()
 	if (NET.SendUnreliableMessage(CL.cls.netcon, buf) === -1)
 	{
 		Con.Print('CL.SendMove: lost server connection\n');
-		CL.Disconnect();
+		await CL.Disconnect();
 	}
 };
 
@@ -595,7 +595,7 @@ CL.ClearState = function()
 		CL.beams[i] = {endtime: 0.0};
 };
 
-CL.Disconnect = function()
+CL.Disconnect = async function()
 {
 	S.StopAllSounds();
 	if (CL.cls.demoplayback === true)
@@ -612,7 +612,7 @@ CL.Disconnect = function()
 		NET.Close(CL.cls.netcon);
 		CL.cls.state = CL.active.disconnected;
 		if (SV.server.active === true)
-			Host.ShutdownServer();
+			await Host.ShutdownServer();
 	}
 	CL.cls.demoplayback = CL.cls.timedemo = false;
 	CL.cls.signon = 0;
@@ -627,15 +627,15 @@ CL.Connect = function(sock)
 	CL.cls.signon = 0;
 };
 
-CL.EstablishConnection = function(host)
+CL.EstablishConnection = async function(host)
 {
 	if (CL.cls.demoplayback === true)
 		return;
-	CL.Disconnect();
+	await CL.Disconnect();
 	CL.host = host;
 	var sock = NET.Connect(host);
 	if (sock == null)
-		Host.Error('CL.EstablishConnection: connect failed\n');
+		await Host.Error('CL.EstablishConnection: connect failed\n');
 	CL.Connect(sock);
 };
 
@@ -918,7 +918,7 @@ CL.ReadFromServer = async function()
 	{
 		ret = CL.GetMessage();
 		if (ret === -1)
-			Host.Error('CL.ReadFromServer: lost server connection');
+			await Host.Error('CL.ReadFromServer: lost server connection');
 		if (ret === 0)
 			break;
 		CL.state.last_received_message = Host.realtime;
@@ -932,7 +932,7 @@ CL.ReadFromServer = async function()
 	CL.UpdateTEnts();
 };
 
-CL.SendCmd = function()
+CL.SendCmd = async function()
 {
 	if (CL.cls.state !== CL.active.connected)
 		return;
@@ -941,7 +941,7 @@ CL.SendCmd = function()
 	{
 		CL.BaseMove();
 		IN.Move();
-		CL.SendMove();
+		await CL.SendMove();
 	}
 
 	if (CL.cls.demoplayback === true)
@@ -960,7 +960,7 @@ CL.SendCmd = function()
 	}
 
 	if (NET.SendMessage(CL.cls.netcon, CL.cls.message) === -1)
-		Host.Error('CL.SendCmd: lost server connection');
+		await Host.Error('CL.SendCmd: lost server connection');
 
 	CL.cls.message.cursize = 0;
 };
@@ -1089,7 +1089,7 @@ CL.ParseStartSoundPacket = function()
 };
 
 CL.lastmsg = 0.0;
-CL.KeepaliveMessage = function()
+CL.KeepaliveMessage = async function()
 {
 	if ((SV.server.active === true) || (CL.cls.demoplayback === true))
 		return;
@@ -1105,12 +1105,12 @@ CL.KeepaliveMessage = function()
 		case 0:
 			break;
 		case 1:
-			Host.Error('CL.KeepaliveMessage: received a message');
+			await Host.Error('CL.KeepaliveMessage: received a message');
 		case 2:
 			if (MSG.ReadByte() !== Protocol.svc.nop)
-				Host.Error('CL.KeepaliveMessage: datagram wasn\'t a nop');
+				await Host.Error('CL.KeepaliveMessage: datagram wasn\'t a nop');
 		default:
-			Host.Error('CL.KeepaliveMessage: CL.GetMessage failed');
+			await Host.Error('CL.KeepaliveMessage: CL.GetMessage failed');
 		}
 		if (ret === 0)
 			break;
@@ -1185,13 +1185,13 @@ CL.ParseServerInfo = async function()
 			Con.Print('Model ' + model_precache[i] + ' not found\n');
 			return;
 		}
-		CL.KeepaliveMessage();
+		await CL.KeepaliveMessage();
 	}
 	CL.state.sound_precache = [];
 	for (i = 1; i < numsounds; ++i)
 	{
 		CL.state.sound_precache[i] = S.PrecacheSound(sound_precache[i]);
-		CL.KeepaliveMessage();
+		await CL.KeepaliveMessage();
 	}
 
 	CL.state.worldmodel = CL.state.model_precache[1];
@@ -1381,7 +1381,7 @@ CL.ParseServerMessage = async function()
 	for (;;)
 	{
 		if (MSG.badread === true)
-			Host.Error('CL.ParseServerMessage: Bad server message');
+			await Host.Error('CL.ParseServerMessage: Bad server message');
 
 		cmd = MSG.ReadByte();
 
@@ -1413,10 +1413,10 @@ CL.ParseServerMessage = async function()
 		case Protocol.svc.version:
 			i = MSG.ReadLong();
 			if (i !== Protocol.version)
-				Host.Error('CL.ParseServerMessage: Server is protocol ' + i + ' instead of ' + Protocol.version + '\n');
+				await Host.Error('CL.ParseServerMessage: Server is protocol ' + i + ' instead of ' + Protocol.version + '\n');
 			continue;
 		case Protocol.svc.disconnect:
-			Host.EndGame('Server disconnected\n');
+			await Host.EndGame('Server disconnected\n');
 		case Protocol.svc.print:
 			Con.Print(MSG.ReadString());
 			continue;
@@ -1457,19 +1457,19 @@ CL.ParseServerMessage = async function()
 		case Protocol.svc.updatename:
 			i = MSG.ReadByte();
 			if (i >= CL.state.maxclients)
-				Host.Error('CL.ParseServerMessage: svc_updatename > MAX_SCOREBOARD');
+				await Host.Error('CL.ParseServerMessage: svc_updatename > MAX_SCOREBOARD');
 			CL.state.scores[i].name = MSG.ReadString();
 			continue;
 		case Protocol.svc.updatefrags:
 			i = MSG.ReadByte();
 			if (i >= CL.state.maxclients)
-				Host.Error('CL.ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD');
+				await Host.Error('CL.ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD');
 			CL.state.scores[i].frags = MSG.ReadShort();
 			continue;
 		case Protocol.svc.updatecolors:
 			i = MSG.ReadByte();
 			if (i >= CL.state.maxclients)
-				Host.Error('CL.ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD');
+				await Host.Error('CL.ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD');
 			CL.state.scores[i].colors = MSG.ReadByte();
 			continue;
 		case Protocol.svc.particle:
@@ -1494,7 +1494,7 @@ CL.ParseServerMessage = async function()
 		case Protocol.svc.signonnum:
 			i = MSG.ReadByte();
 			if (i <= CL.cls.signon)
-				Host.Error('Received signon ' + i + ' when at ' + CL.cls.signon);
+				await Host.Error('Received signon ' + i + ' when at ' + CL.cls.signon);
 			CL.cls.signon = i;
 			CL.SignonReply();
 			continue;
@@ -1542,7 +1542,7 @@ CL.ParseServerMessage = async function()
 			await Cmd.ExecuteString('help');
 			continue;
 		}
-		Host.Error('CL.ParseServerMessage: Illegible server message\n');
+		await Host.Error('CL.ParseServerMessage: Illegible server message\n');
 	}
 };
 
