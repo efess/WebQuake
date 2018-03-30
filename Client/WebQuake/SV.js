@@ -175,7 +175,7 @@ SV.SendServerinfo = function(client)
 	client.spawned = false;
 };
 
-SV.ConnectClient = function(clientnum)
+SV.ConnectClient = async function(clientnum)
 {
 	var client = SV.svs.clients[clientnum];
 	var i, spawn_parms;
@@ -217,7 +217,7 @@ SV.ConnectClient = function(clientnum)
 	}
 	else
 	{
-		PR.ExecuteProgram(PR.globals_int[PR.globalvars.SetNewParms]);
+		await PR.ExecuteProgram(PR.globals_int[PR.globalvars.SetNewParms]);
 		for (i = 0; i <= 15; ++i)
 			client.spawn_parms[i] = PR.globals_float[PR.globalvars.parms + i];
 	}
@@ -650,7 +650,7 @@ SV.CreateBaseline = function()
 	}
 };
 
-SV.SaveSpawnparms = function()
+SV.SaveSpawnparms = async function()
 {
 	SV.svs.serverflags = PR.globals_float[PR.globalvars.serverflags];
 	var i, j;
@@ -660,13 +660,13 @@ SV.SaveSpawnparms = function()
 		if (Host.client.active !== true)
 			continue;
 		PR.globals_int[PR.globalvars.self] = Host.client.edict.num;
-		PR.ExecuteProgram(PR.globals_int[PR.globalvars.SetChangeParms]);
+		await PR.ExecuteProgram(PR.globals_int[PR.globalvars.SetChangeParms]);
 		for (j = 0; j <= 15; ++j)
 			Host.client.spawn_parms[j] = PR.globals_float[PR.globalvars.parms + j];
 	}
 };
 
-SV.SpawnServer = function(server)
+SV.SpawnServer = async function(server)
 {
 	var i;
 
@@ -681,7 +681,7 @@ SV.SpawnServer = function(server)
 	if (SV.server.active === true)
 	{
 		NET.SendToAll(SV.reconnect);
-		Cmd.ExecuteString('reconnect\n');
+		await Cmd.ExecuteString('reconnect\n');
 	}
 
 	if (Host.coop.value !== 0)
@@ -738,7 +738,7 @@ SV.SpawnServer = function(server)
 	SV.server.lastcheck = 0;
 	SV.server.lastchecktime = 0.0;
 	SV.server.modelname = 'maps/' + server + '.bsp';
-	SV.server.worldmodel = Mod.ForName(SV.server.modelname);
+	SV.server.worldmodel = await Mod.ForName(SV.server.modelname);
 	if (SV.server.worldmodel == null)
 	{
 		Con.Print('Couldn\'t spawn server ' + SV.server.modelname + '\n');
@@ -756,7 +756,7 @@ SV.SpawnServer = function(server)
 	for (i = 1; i <= SV.server.worldmodel.submodels.length; ++i)
 	{
 		SV.server.model_precache[i + 1] = '*' + i;
-		SV.server.models[i + 1] = Mod.ForName('*' + i);
+		SV.server.models[i + 1] = await Mod.ForName('*' + i);
 	}
 
 	SV.server.lightstyles = [];
@@ -1084,7 +1084,7 @@ SV.CheckVelocity = function(ent)
 	}
 };
 
-SV.RunThink = function(ent)
+SV.RunThink = async function(ent)
 {
 	var thinktime = ent.v_float[PR.entvars.nextthink];
 	if ((thinktime <= 0.0) || (thinktime > (SV.server.time + Host.frametime)))
@@ -1095,11 +1095,11 @@ SV.RunThink = function(ent)
 	PR.globals_float[PR.globalvars.time] = thinktime;
 	PR.globals_int[PR.globalvars.self] = ent.num;
 	PR.globals_int[PR.globalvars.other] = 0;
-	PR.ExecuteProgram(ent.v_int[PR.entvars.think]);
+	await PR.ExecuteProgram(ent.v_int[PR.entvars.think]);
 	return (ent.free !== true);
 };
 
-SV.Impact = function(e1, e2)
+SV.Impact = async function(e1, e2)
 {
 	var old_self = PR.globals_int[PR.globalvars.self];
 	var old_other = PR.globals_int[PR.globalvars.other];
@@ -1109,13 +1109,13 @@ SV.Impact = function(e1, e2)
 	{
 		PR.globals_int[PR.globalvars.self] = e1.num;
 		PR.globals_int[PR.globalvars.other] = e2.num;
-		PR.ExecuteProgram(e1.v_int[PR.entvars.touch]);
+		await PR.ExecuteProgram(e1.v_int[PR.entvars.touch]);
 	}
 	if ((e2.v_int[PR.entvars.touch] !== 0) && (e2.v_float[PR.entvars.solid] !== SV.solid.not))
 	{
 		PR.globals_int[PR.globalvars.self] = e2.num;
 		PR.globals_int[PR.globalvars.other] = e1.num;
-		PR.ExecuteProgram(e2.v_int[PR.entvars.touch]);
+		await PR.ExecuteProgram(e2.v_int[PR.entvars.touch]);
 	}
 
 	PR.globals_int[PR.globalvars.self] = old_self;
@@ -1277,7 +1277,7 @@ SV.PushEntity = function(ent, push)
 	return trace;
 };
 
-SV.PushMove = function(pusher, movetime)
+SV.PushMove = async function(pusher, movetime)
 {
 	if ((pusher.v_float[PR.entvars.velocity] === 0.0) &&
 		(pusher.v_float[PR.entvars.velocity1] === 0.0) &&
@@ -1363,7 +1363,7 @@ SV.PushMove = function(pusher, movetime)
 			{
 				PR.globals_int[PR.globalvars.self] = pusher.num;
 				PR.globals_int[PR.globalvars.other] = check.num;
-				PR.ExecuteProgram(pusher.v_int[PR.entvars.blocked]);
+				await PR.ExecuteProgram(pusher.v_int[PR.entvars.blocked]);
 			}
 			for (i = 0; i < moved.length; ++i)
 			{
@@ -1378,7 +1378,7 @@ SV.PushMove = function(pusher, movetime)
 	}
 };
 
-SV.Physics_Pusher = function(ent)
+SV.Physics_Pusher = async function(ent)
 {
 	var oldltime = ent.v_float[PR.entvars.ltime];
 	var thinktime = ent.v_float[PR.entvars.nextthink];
@@ -1399,7 +1399,7 @@ SV.Physics_Pusher = function(ent)
 	PR.globals_float[PR.globalvars.time] = SV.server.time;
 	PR.globals_int[PR.globalvars.self] = ent.num;
 	PR.globals_int[PR.globalvars.other] = 0;
-	PR.ExecuteProgram(ent.v_int[PR.entvars.think]);
+	await PR.ExecuteProgram(ent.v_int[PR.entvars.think]);
 };
 
 SV.CheckStuck = function(ent)
@@ -1565,13 +1565,13 @@ SV.WalkMove = function(ent)
 	ED.SetVector(ent, PR.entvars.velocity, nostepvel);
 };
 
-SV.Physics_Client = function(ent)
+SV.Physics_Client = async function(ent)
 {
 	if (SV.svs.clients[ent.num - 1].active !== true)
 		return;
 	PR.globals_float[PR.globalvars.time] = SV.server.time;
 	PR.globals_int[PR.globalvars.self] = ent.num;
-	PR.ExecuteProgram(PR.globals_int[PR.globalvars.PlayerPreThink]);
+	await PR.ExecuteProgram(PR.globals_int[PR.globalvars.PlayerPreThink]);
 	SV.CheckVelocity(ent);
 	var movetype = ent.v_float[PR.entvars.movetype] >> 0;
 	if ((movetype === SV.movetype.toss) || (movetype === SV.movetype.bounce))
@@ -1605,7 +1605,7 @@ SV.Physics_Client = function(ent)
 	SV.LinkEdict(ent, true);
 	PR.globals_float[PR.globalvars.time] = SV.server.time;
 	PR.globals_int[PR.globalvars.self] = ent.num;
-	PR.ExecuteProgram(PR.globals_int[PR.globalvars.PlayerPostThink]);
+	await PR.ExecuteProgram(PR.globals_int[PR.globalvars.PlayerPostThink]);
 };
 
 SV.Physics_Noclip = function(ent)
@@ -1697,12 +1697,12 @@ SV.Physics_Step = function(ent)
 	SV.CheckWaterTransition(ent);
 };
 
-SV.Physics = function()
+SV.Physics = async function()
 {
 	PR.globals_int[PR.globalvars.self] = 0;
 	PR.globals_int[PR.globalvars.other] = 0;
 	PR.globals_float[PR.globalvars.time] = SV.server.time;
-	PR.ExecuteProgram(PR.globals_int[PR.globalvars.StartFrame]);
+	await PR.ExecuteProgram(PR.globals_int[PR.globalvars.StartFrame]);
 	var i, ent;
 	for (i = 0; i < SV.server.num_edicts; ++i)
 	{
@@ -1980,7 +1980,7 @@ SV.ReadClientMove = function()
 		client.edict.v_float[PR.entvars.impulse] = i;
 };
 
-SV.ReadClientMessage = function()
+SV.ReadClientMessage = async function()
 {
 	var ret, cmd, s, i;
 	var cmds = [
@@ -2039,7 +2039,7 @@ SV.ReadClientMessage = function()
 				{
 					if (s.substring(0, cmds[i].length).toLowerCase() !== cmds[i])
 						continue;
-					Cmd.ExecuteString(s, true);
+					await Cmd.ExecuteString(s, true);
 					break;
 				}
 				if (i === cmds.length)
@@ -2058,7 +2058,7 @@ SV.ReadClientMessage = function()
 	} while (ret === 1);
 };
 
-SV.RunClients = function()
+SV.RunClients = async function()
 {
 	var i;
 	for (i = 0; i < SV.svs.maxclients; ++i)
@@ -2067,7 +2067,7 @@ SV.RunClients = function()
 		if (Host.client.active !== true)
 			continue;
 		SV.player = Host.client.edict;
-		if (SV.ReadClientMessage() !== true)
+		if (await SV.ReadClientMessage() !== true)
 		{
 			Host.DropClient();
 			continue;
@@ -2194,7 +2194,7 @@ SV.UnlinkEdict = function(ent)
 	ent.area.prev = ent.area.next = null;
 };
 
-SV.TouchLinks = function(ent, node)
+SV.TouchLinks = async function(ent, node)
 {
 	var l, next, touch, old_self, old_other;
 	for (l = node.trigger_edicts.next; l !== node.trigger_edicts; l = next)
@@ -2217,7 +2217,7 @@ SV.TouchLinks = function(ent, node)
 		PR.globals_int[PR.globalvars.self] = touch.num;
 		PR.globals_int[PR.globalvars.other] = ent.num;
 		PR.globals_float[PR.globalvars.time] = SV.server.time;
-		PR.ExecuteProgram(touch.v_int[PR.entvars.touch]);
+		await PR.ExecuteProgram(touch.v_int[PR.entvars.touch]);
 		PR.globals_int[PR.globalvars.self] = old_self;
 		PR.globals_int[PR.globalvars.other] = old_other;
 	}

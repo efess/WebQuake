@@ -717,7 +717,7 @@ S.PlayVol = function()
 	}
 };
 
-S.LoadSound = function(s)
+S.LoadSound = async function(s)
 {
 	if (S.nosound.value !== 0)
 		return;
@@ -726,7 +726,7 @@ S.LoadSound = function(s)
 
 	var sc = {};
 
-	var data = COM.LoadFile('sound/' + s.name);
+	var data = await COM.LoadFileAsync('sound/' + s.name);
 	if (data == null)
 	{
 		Con.Print('Couldn\'t load sound/' + s.name + '\n');

@@ -1362,12 +1362,12 @@ R.ClearParticles = function()
 		R.particles[i] = {die: -1.0};
 };
 
-R.ReadPointFile_f = function()
+R.ReadPointFile_f = async function()
 {
 	if (SV.server.active !== true)
 		return;
 	var name = 'maps/' + PR.GetString(PR.globals_int[PR.globalvars.mapname]) + '.pts';
-	var f = COM.LoadTextFile(name);
+	var f = await COM.LoadTextFile(name);
 	if (f == null)
 	{
 		Con.Print('couldn\'t open ' + name + '\n');

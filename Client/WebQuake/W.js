@@ -2,9 +2,9 @@ W = {};
 
 W.lumps = [];
 
-W.LoadWadFile = function(filename)
+W.LoadWadFile = async function(filename)
 {
-	var base = COM.LoadFile(filename);
+	var base = await COM.LoadFileAsync(filename);
 	if (base == null)
 		Sys.Error('W.LoadWadFile: couldn\'t load ' + filename);
 	var view = new DataView(base);

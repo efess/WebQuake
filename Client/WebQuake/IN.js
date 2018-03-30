@@ -132,6 +132,6 @@ IN.onpointerlockchange = function()
 {
 	if (document[IN.pointerLockElement] === VID.mainwindow)
 		return;
-	Key.Event(Key.k.escape, true);
-	Key.Event(Key.k.escape);
+	await Key.Event(Key.k.escape, true);
+	await Key.Event(Key.k.escape);
 };

@@ -141,7 +141,7 @@ window.onload = function()
 	Sys.oldtime = Date.now() * 0.001;
 
 	Sys.Print('Host.Init\n');
-	Host.Init();
+	await Host.Init();
 
 	for (i = 0; i < Sys.events.length; ++i)
 		window[Sys.events[i]] = Sys[Sys.events[i]];
@@ -164,7 +164,7 @@ Sys.onfocus = function()
 	var i;
 	for (i = 0; i < 256; ++i)
 	{
-		Key.Event(i);
+		await Key.Event(i);
 		Key.down[i] = false;
 	}
 };
@@ -174,7 +174,7 @@ Sys.onkeydown = function(e)
 	var key = Sys.scantokey[e.keyCode];
 	if (key == null)
 		return;
-	Key.Event(key, true);
+	await Key.Event(key, true);
 	e.preventDefault();
 };
 
@@ -183,7 +183,7 @@ Sys.onkeyup = function(e)
 	var key = Sys.scantokey[e.keyCode];
 	if (key == null)
 		return;
-	Key.Event(key);
+	await Key.Event(key);
 	e.preventDefault();
 };
 
@@ -204,7 +204,7 @@ Sys.onmousedown = function(e)
 	default:
 		return;
 	}
-	Key.Event(key, true)
+	await Key.Event(key, true)
 	e.preventDefault();
 };
 
@@ -225,15 +225,15 @@ Sys.onmouseup = function(e)
 	default:
 		return;
 	}
-	Key.Event(key)
+	await Key.Event(key)
 	e.preventDefault();
 };
 
 Sys.onmousewheel = function(e)
 {
 	var key = e.wheelDeltaY > 0 ? Key.k.mwheelup : Key.k.mwheeldown;
-	Key.Event(key, true);
-	Key.Event(key);
+	await Key.Event(key, true);
+	await Key.Event(key);
 	e.preventDefault();
 };
 
@@ -245,7 +245,7 @@ Sys.onunload = function()
 Sys.onwheel = function(e)
 {
 	var key = e.deltaY < 0 ? Key.k.mwheelup : Key.k.mwheeldown;
-	Key.Event(key, true);
-	Key.Event(key);
+	await Key.Event(key, true);
+	await Key.Event(key);
 	e.preventDefault();
 };

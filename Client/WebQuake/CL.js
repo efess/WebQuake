@@ -124,7 +124,7 @@ CL.Stop_f = function()
 	Con.Print('Completed demo\n');
 };
 
-CL.Record_f = function()
+CL.Record_f = async function()
 {
 	var c = Cmd.argv.length;
 	if ((c <= 1) || (c >= 5))
@@ -151,7 +151,7 @@ CL.Record_f = function()
 		CL.cls.forcetrack = -1;
 	CL.cls.demoname = COM.DefaultExtension(Cmd.argv[1], '.dem');
 	if (c >= 3)
-		Cmd.ExecuteString('map ' + Cmd.argv[2]);
+		await Cmd.ExecuteString('map ' + Cmd.argv[2]);
 	Con.Print('recording to ' + CL.cls.demoname + '.\n');
 	CL.cls.demofile = new ArrayBuffer(16384);
 	var track = CL.cls.forcetrack.toString() + '\n';
@@ -162,7 +162,7 @@ CL.Record_f = function()
 	CL.cls.demorecording = true;
 };
 
-CL.PlayDemo_f = function()
+CL.PlayDemo_f = async function()
 {
 	if (Cmd.client === true)
 		return;
@@ -174,7 +174,7 @@ CL.PlayDemo_f = function()
 	CL.Disconnect();
 	var name = COM.DefaultExtension(Cmd.argv[1], '.dem');
 	Con.Print('Playing demo from ' + name + '.\n');
-	var demofile = COM.LoadFile(name);
+	var demofile = await COM.LoadFileAsync(name);
 	if (demofile == null)
 	{
 		Con.Print('ERROR: couldn\'t open.\n');
@@ -214,7 +214,7 @@ CL.FinishTimeDemo = function()
 	Con.Print(frames + ' frames ' + time.toFixed(1) + ' seconds ' + (frames / time).toFixed(1) + ' fps\n');
 };
 
-CL.TimeDemo_f = function()
+CL.TimeDemo_f = async function()
 {
 	if (Cmd.client === true)
 		return;
@@ -223,7 +223,7 @@ CL.TimeDemo_f = function()
 		Con.Print('timedemo <demoname> : gets demo speeds\n');
 		return;
 	}
-	CL.PlayDemo_f();
+	await CL.PlayDemo_f();
 	CL.cls.timedemo = true;
 	CL.cls.td_startframe = Host.framecount;
 	CL.cls.td_lastframe = -1;
@@ -909,7 +909,7 @@ CL.RelinkEntities = function()
 	}
 };
 
-CL.ReadFromServer = function()
+CL.ReadFromServer = async function()
 {
 	CL.state.oldtime = CL.state.time;
 	CL.state.time += Host.frametime;
@@ -922,7 +922,7 @@ CL.ReadFromServer = function()
 		if (ret === 0)
 			break;
 		CL.state.last_received_message = Host.realtime;
-		CL.ParseServerMessage();
+		await CL.ParseServerMessage();
 		if (CL.cls.state !== CL.active.connected)
 			break;
 	}
@@ -1127,7 +1127,7 @@ CL.KeepaliveMessage = function()
 	CL.cls.message.cursize = 0;
 };
 
-CL.ParseServerInfo = function()
+CL.ParseServerInfo = async function()
 {
 	Con.DPrint('Serverinfo packet received.\n');
 	CL.ClearState();
@@ -1179,7 +1179,7 @@ CL.ParseServerInfo = function()
 	CL.state.model_precache = [];
 	for (i = 1; i < nummodels; ++i)
 	{
-		CL.state.model_precache[i] = Mod.ForName(model_precache[i]);
+		CL.state.model_precache[i] = await Mod.ForName(model_precache[i]);
 		if (CL.state.model_precache[i] == null)
 		{
 			Con.Print('Model ' + model_precache[i] + ' not found\n');
@@ -1366,7 +1366,7 @@ CL.Shownet = function(x)
 	}
 };
 
-CL.ParseServerMessage = function()
+CL.ParseServerMessage = async function()
 {
 	if (CL.shownet.value === 1)
 		Con.Print(NET.message.cursize + ' ');
@@ -1430,7 +1430,7 @@ CL.ParseServerMessage = function()
 			V.ParseDamage();
 			continue;
 		case Protocol.svc.serverinfo:
-			CL.ParseServerInfo();
+			await CL.ParseServerInfo();
 			SCR.recalc_refdef = true;
 			continue;
 		case Protocol.svc.setangle:
@@ -1482,7 +1482,7 @@ CL.ParseServerMessage = function()
 			CL.ParseStatic();
 			continue;
 		case Protocol.svc.temp_entity:
-			CL.ParseTEnt();
+			await CL.ParseTEnt();
 			continue;
 		case Protocol.svc.setpause:
 			CL.state.paused = MSG.ReadByte() !== 0;
@@ -1539,7 +1539,7 @@ CL.ParseServerMessage = function()
 			SCR.CenterPrint(MSG.ReadString());
 			continue;
 		case Protocol.svc.sellscreen:
-			Cmd.ExecuteString('help');
+			await Cmd.ExecuteString('help');
 			continue;
 		}
 		Host.Error('CL.ParseServerMessage: Illegible server message\n');
@@ -1593,23 +1593,23 @@ CL.ParseBeam = function(m)
 	Con.Print('beam list overflow!\n');
 };
 
-CL.ParseTEnt = function()
+CL.ParseTEnt = async function()
 {
 	var type = MSG.ReadByte();
 
 	switch (type)
 	{
 	case Protocol.te.lightning1:
-		CL.ParseBeam(Mod.ForName('progs/bolt.mdl', true));
+		CL.ParseBeam(await Mod.ForName('progs/bolt.mdl', true));
 		return;
 	case Protocol.te.lightning2:
-		CL.ParseBeam(Mod.ForName('progs/bolt2.mdl', true));
+		CL.ParseBeam(await Mod.ForName('progs/bolt2.mdl', true));
 		return;
 	case Protocol.te.lightning3:
-		CL.ParseBeam(Mod.ForName('progs/bolt3.mdl', true));
+		CL.ParseBeam(await Mod.ForName('progs/bolt3.mdl', true));
 		return;
 	case Protocol.te.beam:
-		CL.ParseBeam(Mod.ForName('progs/beam.mdl', true));
+		CL.ParseBeam(await Mod.ForName('progs/beam.mdl', true));
 		return;
 	}
 

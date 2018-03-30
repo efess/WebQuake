@@ -365,7 +365,7 @@ Key.Init = function()
 	Cmd.AddCommand('unbindall', Key.Unbindall_f);
 };
 
-Key.Event = function(key, down)
+Key.Event = async function(key, down)
 {
 	if (CL.cls.state === CL.active.connecting)
 		return;
@@ -388,7 +388,7 @@ Key.Event = function(key, down)
 		if (Key.dest.value === Key.dest.message)
 			Key.Message(key);
 		else if (Key.dest.value === Key.dest.menu)
-			M.Keydown(key);
+			await M.Keydown(key);
 		else
 			M.ToggleMenu_f();
 		return;
@@ -443,7 +443,7 @@ Key.Event = function(key, down)
 	if (Key.dest.value === Key.dest.message)
 		Key.Message(key);
 	else if (Key.dest.value === Key.dest.menu)
-		M.Keydown(key);
+		await M.Keydown(key);
 	else
 		Key.Console(key);
 };

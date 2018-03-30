@@ -130,11 +130,11 @@ Mod.FindName = function(name)
 	}
 };
 
-Mod.LoadModel = function(mod, crash)
+Mod.LoadModel = async function(mod, crash)
 {
 	if (mod.needload !== true)
 		return mod;
-	var buf = COM.LoadFile(mod.name);
+	var buf = await COM.LoadFileAsync(mod.name);
 	if (buf == null)
 	{
 		if (crash === true)
@@ -157,9 +157,9 @@ Mod.LoadModel = function(mod, crash)
 	return mod;
 };
 
-Mod.ForName = function(name, crash)
+Mod.ForName = async function(name, crash)
 {
-	return Mod.LoadModel(Mod.FindName(name), crash);
+	return await Mod.LoadModel(Mod.FindName(name), crash);
 };
 
 /*

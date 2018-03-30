@@ -64,11 +64,11 @@ Con.Init = function()
 	Cmd.AddCommand('clear', Con.Clear_f);
 };
 
-Con.Print = function(msg)
+Con.Print = async function(msg)
 {
 	if (Con.debuglog === true)
 	{
-		var data = COM.LoadTextFile('qconsole.log');
+		var data = await COM.LoadTextFile('qconsole.log');
 		if (data != null)
 		{
 			data += msg;
@@ -85,7 +85,7 @@ Con.Print = function(msg)
 	{
 		mask = 128;
 		if (msg.charCodeAt(0) === 1)
-			S.LocalSound(Con.sfx_talk);
+			await S.LocalSound(Con.sfx_talk);
 		msg = msg.substring(1);
 	}
 	var i;

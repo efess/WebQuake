@@ -318,7 +318,7 @@ ED.ParseEdict = function(data, ent)
 	return data;
 };
 
-ED.LoadFromFile = function(data)
+ED.LoadFromFile = async function(data)
 {
 	var ent, spawnflags, inhibit = 0, func;
 	PR.globals_float[PR.globalvars.time] = SV.server.time;
@@ -374,7 +374,7 @@ ED.LoadFromFile = function(data)
 		}
 
 		PR.globals_int[PR.globalvars.self] = ent.num;
-		PR.ExecuteProgram(func);
+		await PR.ExecuteProgram(func);
 	}
 
 	Con.DPrint(inhibit + ' entities inhibited\n');

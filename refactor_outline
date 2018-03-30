@@ -1,0 +1,72 @@
+2018 - retry with async/await
+quake refactor
+
+CLIENT
+
+COM.LoadFileAsync
+  - COM.LoadTextFile
+  	- Cmd.Exec_f
+  		- Cmd.Init
+			  - Cmd.ExecuteString
+          -~CL.Record_f
+          - CL.ParseServerMessage
+            - CL.ReadFromServer
+              - Host._Frame 
+                -~Host.Frame
+          -~Host.Map_f
+          - SV.SpawnServer
+            -~Host.Changelevel_f
+            -~Host.Restart_f
+          - SV.ReadClientMessage
+            - SV.RunClients
+              -~Host.ServerFrame
+  	- CON.Print
+      - // HOLY SHIT - NOT making this async
+
+  	-~Host.Loadgame_f
+  	- M.ScanSaves
+      - M.Menu_Load_f
+        - M.SinglePlayer_Key
+          - M.KeyDown
+            -~Key.Event 
+      - M.Menu_Save_f
+        - M.SinglePlayer_Key
+          -~M.KeyDown
+      - M.Load_Key
+        -~M.KeyDown
+      - M.Save_Key
+        -~M.KeyDown
+  	-~R.ReadPointFile_f
+  - COM.CheckRegistered
+    - COM.init
+      -~Host.init
+  - CL.PlayDemo_f
+    -~TimeDemo_f
+  -~Draw.Init
+  -~Draw.CachePic
+  -~M.Init
+  - Mod.LoadModel
+    - Mod.ForName
+      -~CL.ParseServerInfo
+      -~CL.ParseTEnt
+      -~Host.Viewmodel_f
+      - PF.precache_model
+        (added to PF.builtin array)
+          - PR.ExecuteProgram 
+            - ED.LoadFromFile --------------- I"M HERE.
+            - Host.DropClient
+            - Host.Kill_f
+            - Host.Spawn_f
+            - SV.ConnectClient
+            - SV.SaveSpawnparms
+            - SV.RunThink
+            - SV.Impact
+            - SV.PushMove
+            - SV.Physics_Pusher
+            - SV.Physics_Client
+            - SV.Physics
+            - SV.TouchLinks
+  - PR.LoadProgs
+  - S.LoadSound
+  - VID.SetPalette
+  - W.LoadWadFile 

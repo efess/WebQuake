@@ -9,7 +9,7 @@ Cmd.Wait_f = function()
 
 Cmd.text = '';
 
-Cmd.Execute = function()
+Cmd.Execute = async function()
 {
 	var i, c, line = '', quotes = false;
 	while (Cmd.text.length !== 0)
@@ -26,7 +26,7 @@ Cmd.Execute = function()
 		{
 			if (line.length === 0)
 				continue;
-			Cmd.ExecuteString(line);
+			await Cmd.ExecuteString(line);
 			if (Cmd.wait === true)
 			{
 				Cmd.wait = false;
@@ -72,14 +72,14 @@ Cmd.StuffCmds_f = function()
 		Cmd.text = build + '\n' + Cmd.text;
 };
 
-Cmd.Exec_f = function()
+Cmd.Exec_f = async function()
 {
 	if (Cmd.argv.length !== 2)
 	{
 		Con.Print('exec <filename> : execute a script file\n');
 		return;
 	}
-	var f = COM.LoadTextFile(Cmd.argv[1]);
+	var f = await COM.LoadTextFile(Cmd.argv[1]);
 	if (f == null)
 	{
 		Con.Print('couldn\'t exec ' + Cmd.argv[1] + '\n');
@@ -192,7 +192,7 @@ Cmd.CompleteCommand = function(partial)
 	}
 };
 
-Cmd.ExecuteString = function(text, client)
+Cmd.ExecuteString = async function(text, client)
 {
 	Cmd.client = client;
 	Cmd.TokenizeString(text);
@@ -204,7 +204,7 @@ Cmd.ExecuteString = function(text, client)
 	{
 		if (Cmd.functions[i].name === name)
 		{
-			Cmd.functions[i].command();
+			await Cmd.functions[i].command();
 			return;
 		}
 	}

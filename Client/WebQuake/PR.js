@@ -295,9 +295,9 @@ PR.GlobalStringNoContents = function(ofs)
 	return line;
 };
 
-PR.LoadProgs = function()
+PR.LoadProgs = async function()
 {
-	var progs = COM.LoadFile('progs.dat');
+	var progs = await COM.LoadFileAsync('progs.dat');
 	if (progs == null)
 		Sys.Error('PR.LoadProgs: couldn\'t load progs.dat');
 	Con.DPrint('Programs occupy ' + (progs.byteLength >> 10) + 'K.\n');
@@ -596,7 +596,7 @@ PR.LeaveFunction = function()
 	return PR.stack[PR.depth][0];
 };
 
-PR.ExecuteProgram = function(fnum)
+PR.ExecuteProgram = async function(fnum)
 {
 	if ((fnum === 0) || (fnum >= PR.functions.length))
 	{
@@ -807,7 +807,7 @@ PR.ExecuteProgram = function(fnum)
 				ptr = -newf.first_statement;
 				if (ptr >= PF.builtin.length)
 					PR.RunError('Bad builtin call number');
-				PF.builtin[ptr]();
+				await PF.builtin[ptr]();
 				continue;
 			}
 			s = PR.EnterFunction(newf);

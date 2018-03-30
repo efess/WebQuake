@@ -89,7 +89,7 @@ COM.CheckParm = function(parm)
 
 COM.CheckRegistered = function()
 {
-	var h = COM.LoadFile('gfx/pop.lmp');
+	var h = await COM.LoadFileAsync('gfx/pop.lmp');
 	if (h == null)
 	{
 		Con.Print('Playing shareware version.\n');
@@ -151,7 +151,7 @@ COM.InitArgv = function(argv)
 	}
 };
 
-COM.Init = function()
+COM.Init = async function()
 {
 	if ((document.location.protocol !== 'http:') && (document.location.protocol !== 'https:'))
 		Sys.Error('Protocol is ' + document.location.protocol + ', not http: or https:');
@@ -169,7 +169,7 @@ COM.Init = function()
 	Cvar.RegisterVariable('cmdline', COM.cmdline, false, true);
 	Cmd.AddCommand('path', COM.Path_f);
 	COM.InitFilesystem();
-	COM.CheckRegistered();
+	await COM.CheckRegistered();
 };
 
 COM.searchpaths = [];
@@ -278,9 +278,148 @@ COM.LoadFile = function(filename)
 	Draw.EndDisc();
 };
 
-COM.LoadTextFile = function(filename)
+
+COM.LoadFileAsync = async function(filename)
 {
-	var buf = COM.LoadFile(filename);
+	// var e = new Error('dummy');
+	// var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
+	// 		.replace(/^\s+at\s+/gm, '')
+	// 		.replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
+	// 		.split('\n');
+	// COM.asyncTrace = stack;
+	
+	filename = filename.toLowerCase();
+	var xhr = new XMLHttpRequest();
+	xhr.overrideMimeType('text/plain; charset=x-user-defined');
+	var searchPathIdx = COM.searchpaths.length - 1, 
+		packIdx = 0;
+	
+	var i, j, k, netpath, file, data;
+	
+	async function searchPack(searchProps, pak, packNum) {
+		for (k = 0; k < pak.length; ++k)
+		{
+			file = pak[k];
+			if (file.name !== filename)
+				continue;
+			if (file.filelen === 0)
+			{
+				Draw.EndDisc();
+				return new ArrayBuffer(0);
+			}
+			if(searchProps.location === 'store') {
+				return Store.get(name)
+					.then(function _success(entry) {
+						if(entry && entry.data){
+							return entry.data.slice(file.filepos, file.filepos + file.filelen);							
+						}
+					});
+			} else {
+				return new Promise(function(resolve, reject) {
+					xhr.open('GET', searchProps.filename + '/pak' + packNum + '.pak');
+					xhr.setRequestHeader('Range', 'bytes=' + file.filepos + '-' + (file.filepos + file.filelen - 1));
+					xhr.onload = function(){
+						if ((xhr.status >= 200) && (xhr.status <= 299) && (xhr.responseText.length === file.filelen))
+						{
+							Sys.Print('PackFile: ' + searchProps.filename + '/pak' + packNum + '.pak : ' + filename + '\n')
+							Draw.EndDisc();
+							data = xhr.responseText;
+							if(netpath.indexOf('config') > 0 && NET.clPlayerName) {
+								data = data.replace(/_cl_name \".*?\"/, '_cl_name "'+ NET.clPlayerName+'"');				
+							}
+							resolve(Q.strmem(data));
+						}
+            COM.inAsync = false;
+					}
+					xhr.onerror = function(){
+						resolve();
+            COM.inAsync = false;
+					}
+					xhr.send();
+          COM.inAsync = true;
+				});
+			}
+		}
+		// nothing found.
+		return Promise.resolve();
+	}
+	
+	async function searchNet(netPath) {
+		return new Promise(function(resolve, reject){
+			xhr.open('GET', netpath);
+			xhr.onload = function(){
+				if ((xhr.status >= 200) && (xhr.status <= 299))
+				{
+					Sys.Print('FindFile: ' + netpath + '\n');
+					Draw.EndDisc();
+					resolve(Q.strmem(xhr.responseText));
+				}
+				resolve();
+			};
+			xhr.onerror = function() {
+				resolve();
+			};
+			xhr.send();
+		});
+	}
+	
+	async function searchPath(search) {
+		netpath = search.filename + '/' + filename;
+		
+		data = localStorage.getItem('Quake.' + netpath);
+		if (data != null)
+		{
+			if(netpath.indexOf('config') > -1 && NET.clPlayerName) {
+				data = data.replace(/_cl_name \".*?\"/, '_cl_name "'+ NET.clPlayerName+'"');				
+			}
+			Sys.Print('FindFile: ' + netpath + '\n');
+			Draw.EndDisc();
+			return Promise.resolve(Q.strmem(data));
+		} else {
+			var packIdx = search.pack.length - 1;
+
+							
+			function runSearchPack() {
+				return searchPack(search, search.pack[packIdx], packIdx)
+					.then(function(data) {
+						if(data) {
+							return data;
+						} else if(--packIdx >= 0) {
+							return runSearchPack();
+						} else {
+							if(search.location === "store"){
+									if(--searchPathIdx >= 0){
+											return searchPath(COM.searchpaths[searchPathIdx]); 	
+									}   
+							}
+							return searchNet(netpath)
+								.then(function(data) {
+									if(data) {
+										return data;
+									} else {
+										if(--searchPathIdx >= 0){
+											return searchPath(COM.searchpaths[searchPathIdx]);
+										}
+									}
+								});
+						}
+					});
+			}
+			
+			if(search.pack.length > 0) {
+				return runSearchPack();
+			} else {
+				return Promise.resolve();
+			}
+		}
+	}
+	
+	return searchPath(COM.searchpaths[searchPathIdx]);
+};
+
+COM.LoadTextFile = async function(filename)
+{
+	var buf = await COM.LoadFileAsync(filename);
 	if (buf == null)
 		return;
 	var bufview = new Uint8Array(buf);

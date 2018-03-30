@@ -439,7 +439,7 @@ PF.precache_sound = function()
 	SV.server.sound_precache[i] = s;
 };
 
-PF.precache_model = function()
+PF.precache_model = async function()
 {
 	if (SV.server.loading !== true)
 		PR.RunError('PF.Precache_*: Precache can only be done in spawn functions');
@@ -453,7 +453,7 @@ PF.precache_model = function()
 			return;
 	}
 	SV.server.model_precache[i] = s;
-	SV.server.models[i] = Mod.ForName(s, true);
+	SV.server.models[i] = await Mod.ForName(s, true);
 };
 
 PF.coredump = function()
