@@ -87,7 +87,7 @@ COM.CheckParm = function(parm)
 	}
 };
 
-COM.CheckRegistered = function()
+COM.CheckRegistered = async function()
 {
 	var h = await COM.LoadFileAsync('gfx/pop.lmp');
 	if (h == null)
@@ -168,7 +168,7 @@ COM.Init = async function()
 	COM.registered = Cvar.RegisterVariable('registered', '0');
 	Cvar.RegisterVariable('cmdline', COM.cmdline, false, true);
 	Cmd.AddCommand('path', COM.Path_f);
-	COM.InitFilesystem();
+	await COM.InitFilesystem();
 	await COM.CheckRegistered();
 };
 
@@ -224,6 +224,7 @@ COM.WriteTextFile = function(filename, data)
 
 COM.LoadFile = function(filename)
 {
+	debugger
 	filename = filename.toLowerCase();
 	var xhr = new XMLHttpRequest();
 	xhr.overrideMimeType('text/plain; charset=x-user-defined');
@@ -433,56 +434,77 @@ COM.LoadTextFile = async function(filename)
 	return f.join('');
 };
 
-COM.LoadPackFile = function(packfile)
+COM.LoadPackFile = async function(packfile)
 {
-	var xhr = new XMLHttpRequest();
-	xhr.overrideMimeType('text/plain; charset=x-user-defined');
-	xhr.open('GET', packfile, false);
-	xhr.setRequestHeader('Range', 'bytes=0-11');
-	xhr.send();
-	if ((xhr.status <= 199) || (xhr.status >= 300) || (xhr.responseText.length !== 12))
-		return;
-	var header = new DataView(Q.strmem(xhr.responseText));
-	if (header.getUint32(0, true) !== 0x4b434150)
-		Sys.Error(packfile + ' is not a packfile');
-	var dirofs = header.getUint32(4, true);
-	var dirlen = header.getUint32(8, true);
-	var numpackfiles = dirlen >> 6;
-	if (numpackfiles !== 339)
-		COM.modified = true;
-	var pack = [];
-	if (numpackfiles !== 0)
-	{
-		xhr.open('GET', packfile, false);
-		xhr.setRequestHeader('Range', 'bytes=' + dirofs + '-' + (dirofs + dirlen - 1));
+	return new Promise((resolve, reject) => {
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
+		xhr.open('GET', packfile);
+		xhr.setRequestHeader('Range', 'bytes=0-11');
 		xhr.send();
-		if ((xhr.status <= 199) || (xhr.status >= 300) || (xhr.responseText.length !== dirlen))
-			return;
-		var info = Q.strmem(xhr.responseText);
-		if (CRC.Block(new Uint8Array(info)) !== 32981)
-			COM.modified = true;
-		var i;
-		for (i = 0; i < numpackfiles; ++i)
-		{
-			pack[pack.length] =
-			{
-				name: Q.memstr(new Uint8Array(info, i << 6, 56)).toLowerCase(),
-				filepos: (new DataView(info)).getUint32((i << 6) + 56, true),
-				filelen: (new DataView(info)).getUint32((i << 6) + 60, true)
-			}
+		xhr.onload = (resp) => {
+			resolve({status: xhr.status, responseText: xhr.responseText});
 		}
-	}
-	Con.Print('Added packfile ' + packfile + ' (' + numpackfiles + ' files)\n');
-	return pack;
+		xhr.onerror = (resp) => {
+			resolve()
+		}
+	})
+	.then((resp) => {
+		if ((resp.status <= 199) || (resp.status >= 300) || (resp.responseText.length !== 12))
+			return;
+		var header = new DataView(Q.strmem(resp.responseText));
+		if (header.getUint32(0, true) !== 0x4b434150)
+			Sys.Error(packfile + ' is not a packfile');
+		var dirofs = header.getUint32(4, true);
+		var dirlen = header.getUint32(8, true);
+		var numpackfiles = dirlen >> 6;
+		if (numpackfiles !== 339)
+			COM.modified = true;
+		var pack = [];
+		if (numpackfiles !== 0)
+		{
+			return new Promise((resolve, reject) => {
+				var xhr = new XMLHttpRequest();
+				xhr.overrideMimeType('text/plain; charset=x-user-defined');
+				xhr.open('GET', packfile);
+				xhr.setRequestHeader('Range', 'bytes=' + dirofs + '-' + (dirofs + dirlen - 1));
+				xhr.send();
+				xhr.onerror = (resp) => {
+					resolve()
+				}
+				xhr.onload = (resp) => {
+					if ((xhr.status <= 199) || (xhr.status >= 300) || (xhr.responseText.length !== dirlen)) 
+					{
+						reject()
+					}
+					var info = Q.strmem(xhr.responseText);
+					if (CRC.Block(new Uint8Array(info)) !== 32981)
+						COM.modified = true;
+					var i;
+					for (i = 0; i < numpackfiles; ++i)
+					{
+						pack[pack.length] =
+						{
+							name: Q.memstr(new Uint8Array(info, i << 6, 56)).toLowerCase(),
+							filepos: (new DataView(info)).getUint32((i << 6) + 56, true),
+							filelen: (new DataView(info)).getUint32((i << 6) + 60, true)
+						}
+					}
+					Con.Print('Added packfile ' + packfile + ' (' + numpackfiles + ' files)\n');
+					resolve(pack)
+				}
+			})
+		}
+	})
 };
 
-COM.AddGameDirectory = function(dir)
+COM.AddGameDirectory = async function(dir)
 {
 	var search = {filename: dir, pack: []};
 	var pak, i = 0;
 	for (;;)
 	{
-		pak = COM.LoadPackFile(dir + '/' + 'pak' + i + '.pak');
+		pak = await COM.LoadPackFile(dir + '/' + 'pak' + i + '.pak');
 		if (pak == null)
 			break;
 		search.pack[search.pack.length] = pak;
@@ -491,7 +513,7 @@ COM.AddGameDirectory = function(dir)
 	COM.searchpaths[COM.searchpaths.length] = search;
 };
 
-COM.InitFilesystem = function()
+COM.InitFilesystem = async function()
 {
 	var i, search;
 	
@@ -499,14 +521,14 @@ COM.InitFilesystem = function()
 	if (i != null)
 		search = COM.argv[i + 1];
 	if (search != null)
-		COM.AddGameDirectory(search);
+		await COM.AddGameDirectory(search);
 	else
-		COM.AddGameDirectory('id1');
+		await COM.AddGameDirectory('id1');
 		
 	if (COM.rogue === true)
-		COM.AddGameDirectory('rogue');
+		await COM.AddGameDirectory('rogue');
 	else if (COM.hipnotic === true)
-		COM.AddGameDirectory('hipnotic');
+		await COM.AddGameDirectory('hipnotic');
 		
 	i = COM.CheckParm('-game');
 	if (i != null)

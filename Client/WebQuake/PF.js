@@ -35,7 +35,7 @@ PF.makevectors = function()
 	}
 };
 
-PF.setorigin = function()
+PF.setorigin = async function()
 {
 	var e = SV.server.edicts[PR.globals_int[4]];
 	e.v_float[PR.entvars.origin] = PR.globals_float[7];
@@ -63,7 +63,7 @@ PF.setsize = function()
 		[PR.globals_float[10], PR.globals_float[11], PR.globals_float[12]]);
 };
 
-PF.setmodel = function()
+PF.setmodel = async function()
 {
 	var e = SV.server.edicts[PR.globals_int[4]];
 	var m = PR.GetString(PR.globals_int[7]);
@@ -203,9 +203,9 @@ PF.ambientsound = function()
 	MSG.WriteByte(signon, PR.globals_float[13] * 64.0);
 };
 
-PF.sound = function()
+PF.sound = async function()
 {
-	SV.StartSound(SV.server.edicts[PR.globals_int[4]],
+	await SV.StartSound(SV.server.edicts[PR.globals_int[4]],
 		PR.globals_float[7] >> 0,
 		PR.GetString(PR.globals_int[10]),
 		(PR.globals_float[13] * 255.0) >> 0,
@@ -296,7 +296,7 @@ PF.checkclient = function()
 	PR.globals_int[1] = ent.num;
 };
 
-PF.stuffcmd = function()
+PF.stuffcmd = async function()
 {
 	var entnum = PR.globals_int[4];
 	if ((entnum <= 0) || (entnum > SV.svs.maxclients))
@@ -404,7 +404,7 @@ PF.Find = function()
 	PR.globals_int[1] = 0;
 };
 
-PF.MoveToGoal = function()
+PF.MoveToGoal = async function()
 {
 	var ent = SV.server.edicts[PR.globals_int[PR.globalvars.self]];
 	if ((ent.v_float[PR.entvars.flags] & (SV.fl.onground + SV.fl.fly + SV.fl.swim)) === 0)
@@ -416,8 +416,8 @@ PF.MoveToGoal = function()
 	var dist = PR.globals_float[4];
 	if ((ent.v_int[PR.entvars.enemy] !== 0) && (SV.CloseEnough(ent, goal, dist) === true))
 		return;
-	if ((Math.random() >= 0.75) || (SV.StepDirection(ent, ent.v_float[PR.entvars.ideal_yaw], dist) !== true))
-		SV.NewChaseDir(ent, goal, dist);
+	if ((Math.random() >= 0.75) || (await SV.StepDirection(ent, ent.v_float[PR.entvars.ideal_yaw], dist) !== true))
+		await SV.NewChaseDir(ent, goal, dist);
 };
 
 PF.precache_file = function()
@@ -425,7 +425,7 @@ PF.precache_file = function()
 	PR.globals_int[1] = PR.globals_int[4];
 };
 
-PF.precache_sound = function()
+PF.precache_sound = async function()
 {
 	var s = PR.GetString(PR.globals_int[4]);
 	PR.globals_int[1] = PR.globals_int[4];
@@ -492,7 +492,7 @@ PF.walkmove = function()
 	PR.globals_int[PR.globalvars.self] = ent.num;
 };
 
-PF.droptofloor = function()
+PF.droptofloor = async function()
 {
 	var ent = SV.server.edicts[PR.globals_int[PR.globalvars.self]];
 	var trace = SV.Move(ED.Vector(ent, PR.entvars.origin),
@@ -709,7 +709,7 @@ PF.makestatic = function()
 	ED.Free(ent);
 };
 
-PF.setspawnparms = function()
+PF.setspawnparms = async function()
 {
 	var i = PR.globals_int[4];
 	if ((i <= 0) || (i > SV.svs.maxclients))
@@ -727,7 +727,7 @@ PF.changelevel = function()
 	Cmd.text += 'changelevel ' + PR.GetString(PR.globals_int[4]) + '\n';
 };
 
-PF.Fixme = function()
+PF.Fixme = async function()
 {
 	await PR.RunError('unimplemented builtin');
 };

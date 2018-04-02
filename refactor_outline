@@ -2,11 +2,14 @@
 quake refactor
 
 CLIENT
+COM.LoadPackFile
+  - COM.AddGameDirectory
+    -~COM.InitFilesystem
 
 COM.LoadFileAsync
   - COM.LoadTextFile
   	- Cmd.Exec_f
-  		- Cmd.Init
+  		- Cmd.Init (not ASYNC - just initializes some base commands.)
 			  - Cmd.ExecuteString
           -~CL.Record_f
           - CL.ParseServerMessage
@@ -100,7 +103,33 @@ COM.LoadFileAsync
             -~SV.Physics_Client
             -~SV.Physics
             - SV.TouchLinks
-  - PR.LoadProgs
+              - SV.LinkEdict
+                - SV.StepDirection
+                  -~PF.MoveToGoal
+                  -~SV.NewChaseDir
+                -~SV.CheckStuck
+  -~PR.LoadProgs
   - S.LoadSound
+    - S.PrecacheSound
+      -~InitTEnts
+      -~S.PlayVol
+      -~S.Play
+    - S.StartSound
+      -~CL.ParseStartSoundPacket
+      -~PF.sound
+      - S.LocalSound
+        -~M.Load_Key
+        -~M.MultiPlayer_Key
+        -~M.AdjustSliders
+        -~M.Options_Key
+        -~M.Keys_Key
+        - M.Draw -- NOT doing this async since it's a draw routine.
+      -~M.Main_Key
+    - S.StaticSound
+      -~CL.ParseStaticSound
+
   - VID.SetPalette
-  - W.LoadWadFile 
+    - VID.Init
+      -~Host.Init
+  - W.LoadWadFile
+    -~Host.Init

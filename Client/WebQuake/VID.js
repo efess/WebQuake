@@ -16,9 +16,9 @@ VID.SetPalette = async function()
 	}
 };
 
-VID.Init = function()
+VID.Init = async function()
 {
 	document.getElementById('progress').style.display = 'none';
 	GL.Init();
-	VID.SetPalette();
+	await VID.SetPalette();
 };

@@ -200,7 +200,7 @@ PR.progheader_crc = 5927;
 
 // cmds
 
-PR.CheckEmptyString = function(s)
+PR.CheckEmptyString = async function(s)
 {
 	var c = s.charCodeAt(0);
 	if ((Q.isNaN(c) === true) || (c <= 32))

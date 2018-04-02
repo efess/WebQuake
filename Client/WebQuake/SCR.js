@@ -165,7 +165,7 @@ SCR.SizeDown_f = function()
 	SCR.recalc_refdef = true;
 };
 
-SCR.Init = function()
+SCR.Init = async function()
 {
 	SCR.fov = Cvar.RegisterVariable('fov', '90');
 	SCR.viewsize = Cvar.RegisterVariable('viewsize', '100', true);

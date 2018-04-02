@@ -128,7 +128,7 @@ IN.onmousemove = function(e)
 	IN.mouse_y += e[IN.movementY];
 };
 
-IN.onpointerlockchange = function()
+IN.onpointerlockchange = async function()
 {
 	if (document[IN.pointerLockElement] === VID.mainwindow)
 		return;

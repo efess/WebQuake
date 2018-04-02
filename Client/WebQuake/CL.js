@@ -965,11 +965,11 @@ CL.SendCmd = async function()
 	CL.cls.message.cursize = 0;
 };
 
-CL.Init = function()
+CL.Init = async function()
 {
 	CL.ClearState();
 	CL.InitInput();
-	CL.InitTEnts();
+	await CL.InitTEnts();
 	CL.name = Cvar.RegisterVariable('_cl_name', 'player', true);
 	CL.color = Cvar.RegisterVariable('_cl_color', '0', true);
 	CL.upspeed = Cvar.RegisterVariable('cl_upspeed', '200');
@@ -1075,7 +1075,7 @@ CL.EntityNum = function(num)
 	return CL.entities[num];
 };
 
-CL.ParseStartSoundPacket = function()
+CL.ParseStartSoundPacket = async function()
 {
 	var field_mask = MSG.ReadByte();
 	var volume = ((field_mask & 1) !== 0) ? MSG.ReadByte() : 255;
@@ -1085,7 +1085,7 @@ CL.ParseStartSoundPacket = function()
 	var ent = channel >> 3;
 	channel &= 7;
 	var pos = [MSG.ReadCoord(), MSG.ReadCoord(), MSG.ReadCoord()];
-	S.StartSound(ent, channel, CL.state.sound_precache[sound_num], pos, volume / 255.0, attenuation);
+	await S.StartSound(ent, channel, CL.state.sound_precache[sound_num], pos, volume / 255.0, attenuation);
 };
 
 CL.lastmsg = 0.0;
@@ -1190,7 +1190,7 @@ CL.ParseServerInfo = async function()
 	CL.state.sound_precache = [];
 	for (i = 1; i < numsounds; ++i)
 	{
-		CL.state.sound_precache[i] = S.PrecacheSound(sound_precache[i]);
+		CL.state.sound_precache[i] = await S.PrecacheSound(sound_precache[i]);
 		await CL.KeepaliveMessage();
 	}
 
@@ -1348,13 +1348,13 @@ CL.ParseStatic = function()
 	R.SplitEntityOnNode(CL.state.worldmodel.nodes[0]);
 };
 
-CL.ParseStaticSound = function()
+CL.ParseStaticSound = async function()
 {
 	var org = [MSG.ReadCoord(), MSG.ReadCoord(), MSG.ReadCoord()];
 	var sound_num = MSG.ReadByte();
 	var vol = MSG.ReadByte();
 	var atten = MSG.ReadByte();
-	S.StaticSound(CL.state.sound_precache[sound_num], org, vol / 255.0, atten);
+	await S.StaticSound(CL.state.sound_precache[sound_num], org, vol / 255.0, atten);
 };
 
 CL.Shownet = function(x)
@@ -1448,7 +1448,7 @@ CL.ParseServerMessage = async function()
 			CL.lightstyle[i] = MSG.ReadString();
 			continue;
 		case Protocol.svc.sound:
-			CL.ParseStartSoundPacket();
+			await CL.ParseStartSoundPacket();
 			continue;
 		case Protocol.svc.stopsound:
 			i = MSG.ReadShort();
@@ -1511,7 +1511,7 @@ CL.ParseServerMessage = async function()
 			CL.state.stats[i] = MSG.ReadLong();
 			continue;
 		case Protocol.svc.spawnstaticsound:
-			CL.ParseStaticSound();
+			await CL.ParseStaticSound();
 			continue;
 		case Protocol.svc.cdtrack:
 			CL.state.cdtrack = MSG.ReadByte();
@@ -1550,15 +1550,15 @@ CL.ParseServerMessage = async function()
 
 CL.temp_entities = [];
 
-CL.InitTEnts = function()
+CL.InitTEnts = async function()
 {
-	CL.sfx_wizhit = S.PrecacheSound('wizard/hit.wav');
-	CL.sfx_knighthit = S.PrecacheSound('hknight/hit.wav');
-	CL.sfx_tink1 = S.PrecacheSound('weapons/tink1.wav');
-	CL.sfx_ric1 = S.PrecacheSound('weapons/ric1.wav');
-	CL.sfx_ric2 = S.PrecacheSound('weapons/ric2.wav');
-	CL.sfx_ric3 = S.PrecacheSound('weapons/ric3.wav');
-	CL.sfx_r_exp3 = S.PrecacheSound('weapons/r_exp3.wav');
+	CL.sfx_wizhit = await S.PrecacheSound('wizard/hit.wav');
+	CL.sfx_knighthit = await S.PrecacheSound('hknight/hit.wav');
+	CL.sfx_tink1 = await S.PrecacheSound('weapons/tink1.wav');
+	CL.sfx_ric1 = await S.PrecacheSound('weapons/ric1.wav');
+	CL.sfx_ric2 = await S.PrecacheSound('weapons/ric2.wav');
+	CL.sfx_ric3 = await S.PrecacheSound('weapons/ric3.wav');
+	CL.sfx_r_exp3 = await S.PrecacheSound('weapons/r_exp3.wav');
 };
 
 CL.ParseBeam = function(m)
@@ -1619,11 +1619,11 @@ CL.ParseTEnt = async function()
 	{
 	case Protocol.te.wizspike:
 		R.RunParticleEffect(pos, Vec.origin, 20, 20);
-		S.StartSound(-1, 0, CL.sfx_wizhit, pos, 1.0, 1.0);
+		await S.StartSound(-1, 0, CL.sfx_wizhit, pos, 1.0, 1.0);
 		return;
 	case Protocol.te.knightspike:
 		R.RunParticleEffect(pos, Vec.origin, 226, 20);
-		S.StartSound(-1, 0, CL.sfx_knighthit, pos, 1.0, 1.0);
+		await S.StartSound(-1, 0, CL.sfx_knighthit, pos, 1.0, 1.0);
 		return;
 	case Protocol.te.spike:
 		R.RunParticleEffect(pos, Vec.origin, 0, 10);
@@ -1641,11 +1641,11 @@ CL.ParseTEnt = async function()
 		dl.radius = 350.0;
 		dl.die = CL.state.time + 0.5;
 		dl.decay = 300.0;
-		S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
+		await S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
 		return;
 	case Protocol.te.tarexplosion:
 		R.BlobExplosion(pos);
-		S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
+		await S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
 		return;
 	case Protocol.te.lavasplash:
 		R.LavaSplash(pos);
@@ -1662,7 +1662,7 @@ CL.ParseTEnt = async function()
 		dl.radius = 350.0;
 		dl.die = CL.state.time + 0.5;
 		dl.decay = 300.0;
-		S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
+		await S.StartSound(-1, 0, CL.sfx_r_exp3, pos, 1.0, 1.0);
 		return;
 	}
 

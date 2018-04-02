@@ -207,7 +207,7 @@ Host._Frame = async function()
 
 	var time1, time2, pass1, pass2, pass3, tot;
 
-	Cmd.Execute();
+	await Cmd.Execute();
 
 	await CL.SendCmd();
 	if (SV.server.active === true)
@@ -291,7 +291,7 @@ Host.Init = async function()
 	Chase.Init();
 	await COM.Init();
 	Host.InitLocal();
-	W.LoadWadFile('gfx.wad');
+	await W.LoadWadFile('gfx.wad');
 	Key.Init();
 	Con.Init();
 	PR.Init();
@@ -299,15 +299,15 @@ Host.Init = async function()
 	NET.Init();
 	SV.Init();
 	Con.Print(Def.timedate);
-	VID.Init();
+	await VID.Init();
 	await Draw.Init();
 	await SCR.Init();
 	R.Init();
-	S.Init();
+	await S.Init();
 	await M.Init();
 	CDAudio.Init();
 	await Sbar.Init();
-	CL.Init();
+	await CL.Init();
 	IN.Init();
 	Cmd.text = 'exec quake.rc\n' + Cmd.text;
 	Host.initialized = true;

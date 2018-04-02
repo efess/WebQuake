@@ -118,7 +118,7 @@ M.Main_Draw = function()
 	M.DrawPic(54, 32 + M.main_cursor * 20, M.menudot[Math.floor(Host.realtime * 10.0) % 6]);
 };
 
-M.Main_Key = function(k)
+M.Main_Key = async function(k)
 {
 	switch (k)
 	{
@@ -130,12 +130,12 @@ M.Main_Key = function(k)
 			CL.NextDemo();
 		return;
 	case Key.k.downarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.main_cursor >= M.main_items)
 			M.main_cursor = 0;
 		return;
 	case Key.k.uparrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.main_cursor < 0)
 			M.main_cursor = M.main_items - 1;
 		return;
@@ -188,12 +188,12 @@ M.SinglePlayer_Key = async function(k)
 		M.Menu_Main_f();
 		return;
 	case Key.k.downarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.singleplayer_cursor >= M.singleplayer_items)
 			M.singleplayer_cursor = 0;
 		return;
 	case Key.k.uparrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.singleplayer_cursor < 0)
 			M.singleplayer_cursor = M.singleplayer_items - 1;
 		return;
@@ -317,7 +317,7 @@ M.Load_Key = async function(k)
 		M.Menu_SinglePlayer_f();
 		return;
 	case Key.k.enter:
-		S.LocalSound(M.sfx_menu2);
+		await S.LocalSound(M.sfx_menu2);
 		if (M.loadable[M.load_cursor] !== true)
 			return;
 		M.state.value = M.state.none;
@@ -327,13 +327,13 @@ M.Load_Key = async function(k)
 		return;
 	case Key.k.uparrow:
 	case Key.k.leftarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.load_cursor < 0)
 			M.load_cursor = M.max_savegames - 1;
 		return;
 	case Key.k.downarrow:
 	case Key.k.rightarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.load_cursor >= M.max_savegames)
 			M.load_cursor = 0;
 		return;
@@ -361,13 +361,13 @@ M.Save_Key = async function(k)
 		return;
 	case Key.k.uparrow:
 	case Key.k.leftarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.load_cursor < 0)
 			M.load_cursor = M.max_savegames - 1;
 		return;
 	case Key.k.downarrow:
 	case Key.k.rightarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.load_cursor >= M.max_savegames)
 			M.load_cursor = 0;
 		return;
@@ -432,7 +432,7 @@ M.MultiPlayer_Draw = function()
 		M.PrintWhite(52, 172, 'No Communications Available');
 };
 
-M.MultiPlayer_Key = function(k)
+M.MultiPlayer_Key = async function(k)
 {
 	if (k === Key.k.escape)
 		M.Menu_Main_f();
@@ -440,12 +440,12 @@ M.MultiPlayer_Key = function(k)
 	switch (k)
 	{
 	case Key.k.uparrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.multiplayer_cursor < 0)
 			M.multiplayer_cursor = M.multiplayer_items - 1;
 		return;
 	case Key.k.downarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.multiplayer_cursor >= M.multiplayer_items)
 			M.multiplayer_cursor = 0;
 		return;
@@ -454,13 +454,13 @@ M.MultiPlayer_Key = function(k)
 		{
 			if (--M.multiplayer_top < 0)
 				M.multiplayer_top = 13;
-			S.LocalSound(M.sfx_menu3);
+			await S.LocalSound(M.sfx_menu3);
 		}
 		else if (M.multiplayer_cursor === 3)
 		{
 			if (--M.multiplayer_bottom < 0)
 				M.multiplayer_bottom = 13;
-			S.LocalSound(M.sfx_menu3);
+			await S.LocalSound(M.sfx_menu3);
 		}
 		return;
 	case Key.k.rightarrow:
@@ -470,13 +470,13 @@ M.MultiPlayer_Key = function(k)
 			(M.multiplayer_bottom <= 12) ? ++M.multiplayer_bottom : M.multiplayer_bottom = 0;
 		else
 			return;
-		S.LocalSound(M.sfx_menu3);
+		await S.LocalSound(M.sfx_menu3);
 		return;
 	case Key.k.enter:
 		switch (M.multiplayer_cursor)
 		{
 		case 0:
-			S.LocalSound(M.sfx_menu2);
+			await S.LocalSound(M.sfx_menu2);
 			if (WEBS.available !== true)
 				return;
 			Key.dest.value = Key.dest.game;
@@ -487,11 +487,11 @@ M.MultiPlayer_Key = function(k)
 			Cmd.text += M.multiplayer_joinname + '"\n';
 			return;
 		case 2:
-			S.LocalSound(M.sfx_menu3);
+			await S.LocalSound(M.sfx_menu3);
 			(M.multiplayer_top <= 12) ? ++M.multiplayer_top : M.multiplayer_top = 0;
 			return;
 		case 3:
-			S.LocalSound(M.sfx_menu3);
+			await S.LocalSound(M.sfx_menu3);
 			(M.multiplayer_bottom <= 12) ? ++M.multiplayer_bottom : M.multiplayer_bottom = 0;
 			return;
 		case 4:
@@ -546,9 +546,9 @@ M.Menu_Options_f = function()
 	M.entersound = true;
 };
 
-M.AdjustSliders = function(dir)
+M.AdjustSliders = async function(dir)
 {
-	S.LocalSound(M.sfx_menu3);
+	await S.LocalSound(M.sfx_menu3);
 	
 	switch (M.options_cursor)
 	{
@@ -665,7 +665,7 @@ M.Options_Draw = function()
 	M.DrawCharacter(200, 32 + (M.options_cursor << 3), 12 + ((Host.realtime * 4.0) & 1));
 };
 
-M.Options_Key = function(k)
+M.Options_Key = async function(k)
 {
 	switch (k)
 	{
@@ -687,24 +687,24 @@ M.Options_Key = function(k)
 			Cmd.text += 'exec default.cfg\n';
 			return;
 		default:
-			M.AdjustSliders(1);
+			await M.AdjustSliders(1);
 		}
 		return;
 	case Key.k.uparrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.options_cursor < 0)
 			M.options_cursor = M.options_items - 1;
 		return;
 	case Key.k.downarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.options_cursor >= M.options_items)
 			M.options_cursor = 0;
 		return;
 	case Key.k.leftarrow:
-		M.AdjustSliders(-1);
+		await M.AdjustSliders(-1);
 		return;
 	case Key.k.rightarrow:
-		M.AdjustSliders(1);
+		await M.AdjustSliders(1);
 	}
 };
 
@@ -797,11 +797,11 @@ M.Keys_Draw = function()
 	}
 };
 
-M.Keys_Key = function(k)
+M.Keys_Key = async function(k)
 {
 	if (M.bind_grab === true)
 	{
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if ((k !== Key.k.escape) && (k !== 96))
 			Cmd.text = 'bind "' + Key.KeynumToString(k) + '" "' + M.bindnames[M.keys_cursor][0] + '"\n' + Cmd.text;
 		M.bind_grab = false;
@@ -815,25 +815,25 @@ M.Keys_Key = function(k)
 		return;
 	case Key.k.leftarrow:
 	case Key.k.uparrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (--M.keys_cursor < 0)
 			M.keys_cursor = M.bindnames.length - 1;
 		return;
 	case Key.k.downarrow:
 	case Key.k.rightarrow:
-		S.LocalSound(M.sfx_menu1);
+		await S.LocalSound(M.sfx_menu1);
 		if (++M.keys_cursor >= M.bindnames.length)
 			M.keys_cursor = 0;
 		return;
 	case Key.k.enter:
-		S.LocalSound(M.sfx_menu2);
+		await S.LocalSound(M.sfx_menu2);
 		if (M.FindKeysForCommand(M.bindnames[M.keys_cursor][0])[1] != null)
 			M.UnbindCommand(M.bindnames[M.keys_cursor][0]);
 		M.bind_grab = true;
 		return;
 	case Key.k.backspace:
 	case Key.k.del:
-		S.LocalSound(M.sfx_menu2);
+		await S.LocalSound(M.sfx_menu2);
 		M.UnbindCommand(M.bindnames[M.keys_cursor][0]);
 	}
 };
@@ -900,7 +900,7 @@ M.Menu_Quit_f = function()
 	M.msgNumber = Math.floor(Math.random() * M.quitMessage.length);
 };
 
-M.Quit_Draw = function()
+M.Quit_Draw = async function()
 {
 	if (M.wasInMenus === true)
 	{
@@ -955,9 +955,9 @@ M.Init = async function()
 	Cmd.AddCommand('help', M.Menu_Help_f);
 	Cmd.AddCommand('menu_quit', M.Menu_Quit_f);
 
-	M.sfx_menu1 = S.PrecacheSound('misc/menu1.wav');
-	M.sfx_menu2 = S.PrecacheSound('misc/menu2.wav');
-	M.sfx_menu3 = S.PrecacheSound('misc/menu3.wav');
+	M.sfx_menu1 = await S.PrecacheSound('misc/menu1.wav');
+	M.sfx_menu2 = await S.PrecacheSound('misc/menu2.wav');
+	M.sfx_menu3 = await S.PrecacheSound('misc/menu3.wav');
 
 	M.box_tl = await Draw.CachePic('box_tl');
 	M.box_ml = await Draw.CachePic('box_ml');
@@ -1029,7 +1029,7 @@ M.Init = async function()
 	];
 };
 
-M.Draw = function()
+M.Draw = async function()
 {
 	if ((M.state.value === M.state.none) || (Key.dest.value !== Key.dest.menu))
 		return;
@@ -1085,7 +1085,7 @@ M.Keydown = async function(key)
 	switch (M.state.value)
 	{
 	case M.state.main:
-		M.Main_Key(key);
+		await M.Main_Key(key);
 		return;
 	case M.state.singleplayer:
 		await M.SinglePlayer_Key(key);
@@ -1097,13 +1097,13 @@ M.Keydown = async function(key)
 		await M.Save_Key(key);
 		return;
 	case M.state.multiplayer:
-		M.MultiPlayer_Key(key);
+		await M.MultiPlayer_Key(key);
 		return;
 	case M.state.options:
-		M.Options_Key(key);
+		await M.Options_Key(key);
 		return;
 	case M.state.keys:
-		M.Keys_Key(key);
+		await M.Keys_Key(key);
 		return;
 	case M.state.help:
 		M.Help_Key(key);
