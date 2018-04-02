@@ -275,7 +275,7 @@ S.StartSound = async function(entnum, entchannel, sfx, origin, vol, attenuation)
 		if (volume > 1.0)
 			volume = 1.0;
 		target_chan.audio.volume = volume * S.volume.value;
-		target_chan.audio.play();
+		await target_chan.audio.play();
 	}
 };
 
@@ -427,7 +427,7 @@ S.LocalSound = async function(sound)
 	await S.StartSound(CL.state.viewentity, -1, sound, Vec.origin, 1.0, 1.0);
 };
 
-S.UpdateAmbientSounds = function()
+S.UpdateAmbientSounds = async function()
 {
 	if (CL.state.worldmodel == null)
 		return;
@@ -485,7 +485,7 @@ S.UpdateAmbientSounds = function()
 			else
 			{
 				if (ch.audio.paused !== true)
-					ch.audio.pause();
+					await ch.audio.pause();
 			}
 			continue;
 		}
@@ -502,7 +502,7 @@ S.UpdateAmbientSounds = function()
 			sc = ch.sfx.cache;
 			if (ch.audio.paused === true)
 			{
-				ch.audio.play();
+				await ch.audio.play();
 				ch.end = Host.realtime + sc.length;
 				continue;
 			}
@@ -580,7 +580,7 @@ S.UpdateDynamicSounds = function()
 	}
 };
 
-S.UpdateStaticSounds = function()
+S.UpdateStaticSounds = async function()
 {
 	var i, j, ch, ch2, sfx, sc, volume;
 
@@ -643,7 +643,7 @@ S.UpdateStaticSounds = function()
 			sc = ch.sfx.cache;
 			if (ch.audio.paused === true)
 			{
-				ch.audio.play();
+				await ch.audio.play();
 				ch.end = Host.realtime + sc.length;
 				continue;
 			}
@@ -663,7 +663,7 @@ S.UpdateStaticSounds = function()
 	}
 };
 
-S.Update = function(origin, forward, right, up)
+S.Update = async function(origin, forward, right, up)
 {
 	if (S.nosound.value !== 0)
 		return;
@@ -686,9 +686,9 @@ S.Update = function(origin, forward, right, up)
 	else if (S.volume.value > 1.0)
 		Cvar.SetValue('volume', 1.0);
 
-	S.UpdateAmbientSounds();
+	await S.UpdateAmbientSounds();
 	S.UpdateDynamicSounds();
-	S.UpdateStaticSounds();
+	await S.UpdateStaticSounds();
 };
 
 S.Play = async function()

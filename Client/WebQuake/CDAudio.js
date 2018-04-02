@@ -2,7 +2,7 @@ CDAudio = {};
 
 CDAudio.known = [];
 
-CDAudio.Play = function(track, looping)
+CDAudio.Play = async function(track, looping)
 {
 	if ((CDAudio.initialized !== true) || (CDAudio.enabled !== true))
 		return;
@@ -13,7 +13,7 @@ CDAudio.Play = function(track, looping)
 		{
 			CDAudio.cd.loop = looping;
 			if ((looping === true) && (CDAudio.cd.paused === true))
-				CDAudio.cd.play();
+				await CDAudio.cd.play();
 		}
 		return;
 	}
@@ -27,7 +27,7 @@ CDAudio.Play = function(track, looping)
 	CDAudio.cd = new Audio(CDAudio.known[track]);
 	CDAudio.cd.loop = looping;
 	CDAudio.cd.volume = CDAudio.cdvolume;
-	CDAudio.cd.play();
+	await CDAudio.cd.play();
 };
 
 CDAudio.Stop = function()
@@ -56,7 +56,7 @@ CDAudio.Resume = function()
 		CDAudio.cd.play();
 };
 
-CDAudio.CD_f = function()
+CDAudio.CD_f = async function()
 {
 	if ((CDAudio.initialized !== true) || (Cmd.argv.length <= 1))
 		return;
@@ -71,10 +71,10 @@ CDAudio.CD_f = function()
 		CDAudio.enabled = false;
 		return;
 	case 'play':
-		CDAudio.Play(Q.atoi(Cmd.argv[2]), false);
+		await CDAudio.Play(Q.atoi(Cmd.argv[2]), false);
 		return;
 	case 'loop':
-		CDAudio.Play(Q.atoi(Cmd.argv[2]), true);
+		await CDAudio.Play(Q.atoi(Cmd.argv[2]), true);
 		return;
 	case 'stop':
 		CDAudio.Stop();
@@ -83,7 +83,7 @@ CDAudio.CD_f = function()
 		CDAudio.Pause();
 		return;
 	case 'resume':
-		CDAudio.Resume();
+		await CDAudio.Resume();
 		return;
 	case 'info':
 		Con.Print(CDAudio.known.length + ' tracks\n');

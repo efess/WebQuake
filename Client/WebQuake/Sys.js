@@ -16,7 +16,7 @@ Sys.Quit = function()
 		document.getElementById('end2').style.display = 'inline';
 	else
 		document.getElementById('end1').style.display = 'inline';
-	throw new Error;
+	// throw new Error;
 };
 
 Sys.Print = function(text)
@@ -158,9 +158,13 @@ window.onload = async function()
 
 		if(!Sys.looping)
 			return;
+		if(COM.inAsync) {
+			debugger;
+		}
 			
 		var putzAroundTime = Math.max((1000.0 / Sys.maxFps) - (Date.now() - timeIn), 0);
-		setTimeout(gameLoop, putzAroundTime);
+		
+		return setTimeout(gameLoop, putzAroundTime);
 	}
 
 	Sys.looping = true;

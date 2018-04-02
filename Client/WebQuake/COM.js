@@ -317,6 +317,7 @@ COM.LoadFileAsync = async function(filename)
 					});
 			} else {
 				return new Promise(function(resolve, reject) {
+          COM.inAsync = true;
 					xhr.open('GET', searchProps.filename + '/pak' + packNum + '.pak');
 					xhr.setRequestHeader('Range', 'bytes=' + file.filepos + '-' + (file.filepos + file.filelen - 1));
 					xhr.onload = function(){
@@ -330,6 +331,7 @@ COM.LoadFileAsync = async function(filename)
 							}
 							resolve(Q.strmem(data));
 						}
+						resolve();
             COM.inAsync = false;
 					}
 					xhr.onerror = function(){
@@ -337,7 +339,6 @@ COM.LoadFileAsync = async function(filename)
             COM.inAsync = false;
 					}
 					xhr.send();
-          COM.inAsync = true;
 				});
 			}
 		}

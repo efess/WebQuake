@@ -5,7 +5,13 @@ CLIENT
 COM.LoadPackFile
   - COM.AddGameDirectory
     -~COM.InitFilesystem
-
+Audio.play()
+  - S.UpdateAmbientSounds
+    - S.Update
+  - S.UpdateStaticSounds
+  - CDAudio.Play
+    
+  - CDAudio.Resume
 COM.LoadFileAsync
   - COM.LoadTextFile
   	- Cmd.Exec_f

@@ -224,11 +224,11 @@ Host._Frame = async function()
 
 	if (CL.cls.signon === 4)
 	{
-		S.Update(R.refdef.vieworg, R.vpn, R.vright, R.vup);
+		await S.Update(R.refdef.vieworg, R.vpn, R.vright, R.vup);
 		CL.DecayLights();
 	}
 	else
-		S.Update(Vec.origin, Vec.origin, Vec.origin, Vec.origin);
+		await S.Update(Vec.origin, Vec.origin, Vec.origin, Vec.origin);
 	CDAudio.Update();
 
 	if (Host.speeds.value !== 0)

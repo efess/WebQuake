@@ -205,7 +205,7 @@ PF.ambientsound = function()
 
 PF.sound = async function()
 {
-	await SV.StartSound(SV.server.edicts[PR.globals_int[4]],
+	SV.StartSound(SV.server.edicts[PR.globals_int[4]],
 		PR.globals_float[7] >> 0,
 		PR.GetString(PR.globals_int[10]),
 		(PR.globals_float[13] * 255.0) >> 0,
@@ -476,7 +476,7 @@ PF.eprint = function()
 	ED.Print(SV.server.edicts[PR.globals_float[4]]);
 };
 
-PF.walkmove = function()
+PF.walkmove = async function()
 {
 	var ent = SV.server.edicts[PR.globals_int[PR.globalvars.self]];
 	if ((ent.v_float[PR.entvars.flags] & (SV.fl.onground + SV.fl.fly + SV.fl.swim)) === 0)
@@ -487,7 +487,7 @@ PF.walkmove = function()
 	var yaw = PR.globals_float[4] * Math.PI / 180.0;
 	var dist = PR.globals_float[7];
 	var oldf = PR.xfunction;
-	PR.globals_float[1] = SV.movestep(ent, [Math.cos(yaw) * dist, Math.sin(yaw) * dist], true);
+	PR.globals_float[1] = await SV.movestep(ent, [Math.cos(yaw) * dist, Math.sin(yaw) * dist], true);
 	PR.xfunction = oldf;
 	PR.globals_int[PR.globalvars.self] = ent.num;
 };

@@ -950,7 +950,7 @@ SV.StepDirection = async function(ent, yaw, dist)
 	PF.changeyaw();
 	yaw *= Math.PI / 180.0;
 	var oldorigin = ED.Vector(ent, PR.entvars.origin);
-	if (SV.movestep(ent, [Math.cos(yaw) * dist, Math.sin(yaw) * dist], false) === 1)
+	if (await SV.movestep(ent, [Math.cos(yaw) * dist, Math.sin(yaw) * dist], false) === 1)
 	{
 		var delta = ent.v_float[PR.entvars.angles1] - ent.v_float[PR.entvars.ideal_yaw];
 		if ((delta > 45.0) && (delta < 315.0))

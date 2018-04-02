@@ -1517,9 +1517,9 @@ CL.ParseServerMessage = async function()
 			CL.state.cdtrack = MSG.ReadByte();
 			MSG.ReadByte();
 			if (((CL.cls.demoplayback === true) || (CL.cls.demorecording === true)) && (CL.cls.forcetrack !== -1))
-				CDAudio.Play(CL.cls.forcetrack, true);
+				await CDAudio.Play(CL.cls.forcetrack, true);
 			else
-				CDAudio.Play(CL.state.cdtrack, true);
+				await CDAudio.Play(CL.state.cdtrack, true);
 			continue;
 		case Protocol.svc.intermission:
 			CL.state.intermission = 1;
