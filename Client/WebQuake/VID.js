@@ -4,7 +4,7 @@ VID.d_8to24table = new Uint32Array(new ArrayBuffer(1024));
 
 VID.SetPalette = async function()
 {
-	var palette = await COM.LoadFileAsync('gfx/palette.lmp');
+	var palette = await COM.LoadFile('gfx/palette.lmp');
 	if (palette == null)
 		Sys.Error('Couldn\'t load gfx/palette.lmp');
 	var pal = new Uint8Array(palette);

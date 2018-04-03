@@ -134,7 +134,7 @@ Mod.LoadModel = async function(mod, crash)
 {
 	if (mod.needload !== true)
 		return mod;
-	var buf = await COM.LoadFileAsync(mod.name);
+	var buf = await COM.LoadFile(mod.name);
 	if (buf == null)
 	{
 		if (crash === true)

@@ -297,7 +297,7 @@ PR.GlobalStringNoContents = function(ofs)
 
 PR.LoadProgs = async function()
 {
-	var progs = await COM.LoadFileAsync('progs.dat');
+	var progs = await COM.LoadFile('progs.dat');
 	if (progs == null)
 		Sys.Error('PR.LoadProgs: couldn\'t load progs.dat');
 	Con.DPrint('Programs occupy ' + (progs.byteLength >> 10) + 'K.\n');

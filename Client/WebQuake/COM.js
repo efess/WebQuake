@@ -4,6 +4,39 @@ COM.argv = [];
 
 COM.standard_quake = true;
 
+COM.GetFile = async function(file) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');
+    xhr.open('GET', file);
+    xhr.onload = () => {
+      resolve({
+        status: xhr.status,
+        responseText: xhr.responseText
+      });
+    }
+    xhr.onerror = (e) => reject(e) 
+    xhr.send();
+  });
+};
+
+COM.GetFileRange = async function(file, rangeFrom, rangeTo) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.overrideMimeType('text/plain; charset=x-user-defined');
+    xhr.open('GET', file);
+    xhr.setRequestHeader('Range', 'bytes=' + rangeFrom + '-' + rangeTo);
+    xhr.onload = () => {
+      resolve({
+        status: xhr.status,
+        responseText: xhr.responseText
+      });
+    }
+    xhr.onerror = (e) => reject(e)
+    xhr.send();
+  });
+};
+
 COM.DefaultExtension = function(path, extension)
 {
 	var i, src;
@@ -89,7 +122,7 @@ COM.CheckParm = function(parm)
 
 COM.CheckRegistered = async function()
 {
-	var h = await COM.LoadFileAsync('gfx/pop.lmp');
+	var h = await COM.LoadFile('gfx/pop.lmp');
 	if (h == null)
 	{
 		Con.Print('Playing shareware version.\n');
@@ -222,12 +255,9 @@ COM.WriteTextFile = function(filename, data)
 	return true;
 };
 
-COM.LoadFile = function(filename)
+COM.LoadFile = async function(filename)
 {
-	debugger
 	filename = filename.toLowerCase();
-	var xhr = new XMLHttpRequest();
-	xhr.overrideMimeType('text/plain; charset=x-user-defined');
 	var i, j, k, search, netpath, pak, file, data;
 	Draw.BeginDisc();
 	for (i = COM.searchpaths.length - 1; i >= 0; --i)
@@ -253,175 +283,33 @@ COM.LoadFile = function(filename)
 				{
 					Draw.EndDisc();
 					return new ArrayBuffer(0);
-				}
-				xhr.open('GET', search.filename + '/pak' + j + '.pak', false);
-				xhr.setRequestHeader('Range', 'bytes=' + file.filepos + '-' + (file.filepos + file.filelen - 1));
-				xhr.send();
-				if ((xhr.status >= 200) && (xhr.status <= 299) && (xhr.responseText.length === file.filelen))
+        }
+        const gotFile = await COM.GetFileRange(search.filename + '/pak' + j + '.pak', file.filepos, (file.filepos + file.filelen - 1))
+				
+				if ((gotFile.status >= 200) && (gotFile.status <= 299) && (gotFile.responseText.length === file.filelen))
 				{
 					Sys.Print('PackFile: ' + search.filename + '/pak' + j + '.pak : ' + filename + '\n')
 					Draw.EndDisc();
-					return Q.strmem(xhr.responseText);
+					return Q.strmem(gotFile.responseText);
 				}
 				break;
 			}
-		}
-		xhr.open('GET', netpath, false);
-		xhr.send();
-		if ((xhr.status >= 200) && (xhr.status <= 299))
+    }
+    const gotFile = await COM.GetFile(netpath);
+		if ((gotFile.status >= 200) && (gotFile.status <= 299))
 		{
 			Sys.Print('FindFile: ' + netpath + '\n');
 			Draw.EndDisc();
-			return Q.strmem(xhr.responseText);
+			return Q.strmem(gotFile.responseText);
 		}
 	}
 	Sys.Print('FindFile: can\'t find ' + filename + '\n');
 	Draw.EndDisc();
 };
 
-
-COM.LoadFileAsync = async function(filename)
-{
-	// var e = new Error('dummy');
-	// var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
-	// 		.replace(/^\s+at\s+/gm, '')
-	// 		.replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
-	// 		.split('\n');
-	// COM.asyncTrace = stack;
-	
-	filename = filename.toLowerCase();
-	var xhr = new XMLHttpRequest();
-	xhr.overrideMimeType('text/plain; charset=x-user-defined');
-	var searchPathIdx = COM.searchpaths.length - 1, 
-		packIdx = 0;
-	
-	var i, j, k, netpath, file, data;
-	
-	async function searchPack(searchProps, pak, packNum) {
-		for (k = 0; k < pak.length; ++k)
-		{
-			file = pak[k];
-			if (file.name !== filename)
-				continue;
-			if (file.filelen === 0)
-			{
-				Draw.EndDisc();
-				return new ArrayBuffer(0);
-			}
-			if(searchProps.location === 'store') {
-				return Store.get(name)
-					.then(function _success(entry) {
-						if(entry && entry.data){
-							return entry.data.slice(file.filepos, file.filepos + file.filelen);							
-						}
-					});
-			} else {
-				return new Promise(function(resolve, reject) {
-          COM.inAsync = true;
-					xhr.open('GET', searchProps.filename + '/pak' + packNum + '.pak');
-					xhr.setRequestHeader('Range', 'bytes=' + file.filepos + '-' + (file.filepos + file.filelen - 1));
-					xhr.onload = function(){
-						if ((xhr.status >= 200) && (xhr.status <= 299) && (xhr.responseText.length === file.filelen))
-						{
-							Sys.Print('PackFile: ' + searchProps.filename + '/pak' + packNum + '.pak : ' + filename + '\n')
-							Draw.EndDisc();
-							data = xhr.responseText;
-							if(netpath.indexOf('config') > 0 && NET.clPlayerName) {
-								data = data.replace(/_cl_name \".*?\"/, '_cl_name "'+ NET.clPlayerName+'"');				
-							}
-							resolve(Q.strmem(data));
-						}
-						resolve();
-            COM.inAsync = false;
-					}
-					xhr.onerror = function(){
-						resolve();
-            COM.inAsync = false;
-					}
-					xhr.send();
-				});
-			}
-		}
-		// nothing found.
-		return Promise.resolve();
-	}
-	
-	async function searchNet(netPath) {
-		return new Promise(function(resolve, reject){
-			xhr.open('GET', netpath);
-			xhr.onload = function(){
-				if ((xhr.status >= 200) && (xhr.status <= 299))
-				{
-					Sys.Print('FindFile: ' + netpath + '\n');
-					Draw.EndDisc();
-					resolve(Q.strmem(xhr.responseText));
-				}
-				resolve();
-			};
-			xhr.onerror = function() {
-				resolve();
-			};
-			xhr.send();
-		});
-	}
-	
-	async function searchPath(search) {
-		netpath = search.filename + '/' + filename;
-		
-		data = localStorage.getItem('Quake.' + netpath);
-		if (data != null)
-		{
-			if(netpath.indexOf('config') > -1 && NET.clPlayerName) {
-				data = data.replace(/_cl_name \".*?\"/, '_cl_name "'+ NET.clPlayerName+'"');				
-			}
-			Sys.Print('FindFile: ' + netpath + '\n');
-			Draw.EndDisc();
-			return Promise.resolve(Q.strmem(data));
-		} else {
-			var packIdx = search.pack.length - 1;
-
-							
-			function runSearchPack() {
-				return searchPack(search, search.pack[packIdx], packIdx)
-					.then(function(data) {
-						if(data) {
-							return data;
-						} else if(--packIdx >= 0) {
-							return runSearchPack();
-						} else {
-							if(search.location === "store"){
-									if(--searchPathIdx >= 0){
-											return searchPath(COM.searchpaths[searchPathIdx]); 	
-									}   
-							}
-							return searchNet(netpath)
-								.then(function(data) {
-									if(data) {
-										return data;
-									} else {
-										if(--searchPathIdx >= 0){
-											return searchPath(COM.searchpaths[searchPathIdx]);
-										}
-									}
-								});
-						}
-					});
-			}
-			
-			if(search.pack.length > 0) {
-				return runSearchPack();
-			} else {
-				return Promise.resolve();
-			}
-		}
-	}
-	
-	return searchPath(COM.searchpaths[searchPathIdx]);
-};
-
 COM.LoadTextFile = async function(filename)
 {
-	var buf = await COM.LoadFileAsync(filename);
+	var buf = await COM.LoadFile(filename);
 	if (buf == null)
 		return;
 	var bufview = new Uint8Array(buf);
@@ -437,66 +325,39 @@ COM.LoadTextFile = async function(filename)
 
 COM.LoadPackFile = async function(packfile)
 {
-	return new Promise((resolve, reject) => {
-		var xhr = new XMLHttpRequest();
-		xhr.overrideMimeType('text/plain; charset=x-user-defined');
-		xhr.open('GET', packfile);
-		xhr.setRequestHeader('Range', 'bytes=0-11');
-		xhr.send();
-		xhr.onload = (resp) => {
-			resolve({status: xhr.status, responseText: xhr.responseText});
-		}
-		xhr.onerror = (resp) => {
-			resolve()
-		}
-	})
-	.then((resp) => {
-		if ((resp.status <= 199) || (resp.status >= 300) || (resp.responseText.length !== 12))
+  const gotHeader = await COM.GetFileRange(packfile, 0, 11);
+	if ((gotHeader.status <= 199) || (gotHeader.status >= 300) || (gotHeader.responseText.length !== 12))
+		return;
+	var header = new DataView(Q.strmem(gotHeader.responseText));
+	if (header.getUint32(0, true) !== 0x4b434150)
+		Sys.Error(packfile + ' is not a packfile');
+	var dirofs = header.getUint32(4, true);
+	var dirlen = header.getUint32(8, true);
+	var numpackfiles = dirlen >> 6;
+	if (numpackfiles !== 339)
+		COM.modified = true;
+	var pack = [];
+	if (numpackfiles !== 0)
+	{
+    const fileInfo = await COM.GetFileRange(packfile, dirofs, (dirofs + dirlen - 1))
+		if ((fileInfo.status <= 199) || (fileInfo.status >= 300) || (fileInfo.responseText.length !== dirlen))
 			return;
-		var header = new DataView(Q.strmem(resp.responseText));
-		if (header.getUint32(0, true) !== 0x4b434150)
-			Sys.Error(packfile + ' is not a packfile');
-		var dirofs = header.getUint32(4, true);
-		var dirlen = header.getUint32(8, true);
-		var numpackfiles = dirlen >> 6;
-		if (numpackfiles !== 339)
+		var info = Q.strmem(fileInfo.responseText);
+		if (CRC.Block(new Uint8Array(info)) !== 32981)
 			COM.modified = true;
-		var pack = [];
-		if (numpackfiles !== 0)
+		var i;
+		for (i = 0; i < numpackfiles; ++i)
 		{
-			return new Promise((resolve, reject) => {
-				var xhr = new XMLHttpRequest();
-				xhr.overrideMimeType('text/plain; charset=x-user-defined');
-				xhr.open('GET', packfile);
-				xhr.setRequestHeader('Range', 'bytes=' + dirofs + '-' + (dirofs + dirlen - 1));
-				xhr.send();
-				xhr.onerror = (resp) => {
-					resolve()
-				}
-				xhr.onload = (resp) => {
-					if ((xhr.status <= 199) || (xhr.status >= 300) || (xhr.responseText.length !== dirlen)) 
-					{
-						reject()
-					}
-					var info = Q.strmem(xhr.responseText);
-					if (CRC.Block(new Uint8Array(info)) !== 32981)
-						COM.modified = true;
-					var i;
-					for (i = 0; i < numpackfiles; ++i)
-					{
-						pack[pack.length] =
-						{
-							name: Q.memstr(new Uint8Array(info, i << 6, 56)).toLowerCase(),
-							filepos: (new DataView(info)).getUint32((i << 6) + 56, true),
-							filelen: (new DataView(info)).getUint32((i << 6) + 60, true)
-						}
-					}
-					Con.Print('Added packfile ' + packfile + ' (' + numpackfiles + ' files)\n');
-					resolve(pack)
-				}
-			})
+			pack[pack.length] =
+			{
+				name: Q.memstr(new Uint8Array(info, i << 6, 56)).toLowerCase(),
+				filepos: (new DataView(info)).getUint32((i << 6) + 56, true),
+				filelen: (new DataView(info)).getUint32((i << 6) + 60, true)
+			}
 		}
-	})
+	}
+	Con.Print('Added packfile ' + packfile + ' (' + numpackfiles + ' files)\n');
+	return pack;
 };
 
 COM.AddGameDirectory = async function(dir)

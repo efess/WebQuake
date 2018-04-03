@@ -174,7 +174,7 @@ CL.PlayDemo_f = async function()
 	await CL.Disconnect();
 	var name = COM.DefaultExtension(Cmd.argv[1], '.dem');
 	Con.Print('Playing demo from ' + name + '.\n');
-	var demofile = await COM.LoadFileAsync(name);
+	var demofile = await COM.LoadFile(name);
 	if (demofile == null)
 	{
 		Con.Print('ERROR: couldn\'t open.\n');

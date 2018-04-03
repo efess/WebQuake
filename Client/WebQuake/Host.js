@@ -305,7 +305,7 @@ Host.Init = async function()
 	R.Init();
 	await S.Init();
 	await M.Init();
-	CDAudio.Init();
+	await CDAudio.Init();
 	await Sbar.Init();
 	await CL.Init();
 	IN.Init();

@@ -36,7 +36,7 @@ Draw.Init = async function()
 	gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 	Draw.conback = {};
-	var cb = await COM.LoadFileAsync('gfx/conback.lmp');
+	var cb = await COM.LoadFile('gfx/conback.lmp');
 	if (cb == null)
 		Sys.Error('Couldn\'t load gfx/conback.lmp');
 	Draw.conback.width = 320;
@@ -118,7 +118,7 @@ Draw.PicFromWad = function(name)
 Draw.CachePic = async function(path)
 {
 	path = 'gfx/' + path + '.lmp';
-	var buf = await COM.LoadFileAsync(path);
+	var buf = await COM.LoadFile(path);
 	if (buf == null)
 		Sys.Error('Draw.CachePic: failed to load ' + path);
 	var dat = {};

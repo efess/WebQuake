@@ -4,7 +4,7 @@ W.lumps = [];
 
 W.LoadWadFile = async function(filename)
 {
-	var base = await COM.LoadFileAsync(filename);
+	var base = await COM.LoadFile(filename);
 	if (base == null)
 		Sys.Error('W.LoadWadFile: couldn\'t load ' + filename);
 	var view = new DataView(base);

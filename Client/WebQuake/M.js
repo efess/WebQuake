@@ -992,7 +992,7 @@ M.Init = async function()
 	M.p_multi = await Draw.CachePic('p_multi');
 	M.bigbox = await Draw.CachePic('bigbox');
 	M.menuplyr = await Draw.CachePic('menuplyr');
-	var buf = await COM.LoadFileAsync('gfx/menuplyr.lmp');
+	var buf = await COM.LoadFile('gfx/menuplyr.lmp');
 	var data = GL.ResampleTexture(M.menuplyr.data, M.menuplyr.width, M.menuplyr.height, 64, 64);
 	var trans = new Uint8Array(new ArrayBuffer(16384));
 	var i, p;
