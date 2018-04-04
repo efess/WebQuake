@@ -152,15 +152,14 @@ window.onload = async function()
 			await Host.Frame();
 		} 
 		catch(e) {
-			debugger;
-			return;
+			if(e && e.message)
+			{
+				console.log(e && e.message)
+			}
 		}
 
 		if(!Sys.looping)
 			return;
-		if(COM.inAsync) {
-			debugger;
-		}
 			
 		var putzAroundTime = Math.max((1000.0 / Sys.maxFps) - (Date.now() - timeIn), 0);
 		
