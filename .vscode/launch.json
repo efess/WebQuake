@@ -2,18 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
-            "type": "chrome",
+            "type": "node",
             "request": "launch",
-            "url": "http://localhost:86/index.htm",
-            "webRoot": "${workspaceRoot}/Client"
-        },
-        {
-            "name": "Attach",
-            "type": "chrome",
-            "request": "attach",
-            "port":8089,
-            "webRoot": "${workspaceRoot}/Client"
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/build/devserver"
         }
     ]
 }
