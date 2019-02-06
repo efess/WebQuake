@@ -34,14 +34,14 @@ T1VemWqtEV7gbTIYSIKqXmwC4Ca2chK1kmmP79FaVUAu6hLNB8/O+qmdXg16rapr9rjtohfcE8k3Gvin
 ogEUa7DKzhnT/J6/uwVwrauuDrrprODh/MzOnmBQVL01A/rjAQFUbbWXhyKsYVGNXhIEADs=">
 <style type="text/css">
 canvas {
-	position: fixed;
-	left: 0;
-	top: 0;
-	display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: none;
 }
 #end1, #end2 {
-	background-color: maroon;
-	white-space: pre;
+  background-color: maroon;
+  white-space: pre;
 }
 </style>
 </head>
@@ -111,10 +111,10 @@ varying vec2 vTexCoord;
 varying float vLightDot;
 void main(void)
 {
-	vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aTexCoord;
-	vLightDot = dot(aNormal, uLightVec);
+  vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aTexCoord;
+  vLightDot = dot(aNormal, uLightVec);
 }
 </script>
 <script type="x-shader/x-fragment" id="fshAlias">
@@ -127,11 +127,11 @@ varying vec2 vTexCoord;
 varying float vLightDot;
 void main(void)
 {
-	vec4 texture = texture2D(tTexture, vTexCoord);
-	gl_FragColor = vec4(texture.rgb * mix(1.0, vLightDot * uShadeLight + uAmbientLight, texture.a), 1.0);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  vec4 texture = texture2D(tTexture, vTexCoord);
+  gl_FragColor = vec4(texture.rgb * mix(1.0, vLightDot * uShadeLight + uAmbientLight, texture.a), 1.0);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshBrush">
@@ -147,10 +147,10 @@ varying vec4 vTexCoord;
 varying vec4 vLightStyle;
 void main(void)
 {
-	vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aTexCoord;
-	vLightStyle = aLightStyle;
+  vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aTexCoord;
+  vLightStyle = aLightStyle;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshBrush">
@@ -164,17 +164,17 @@ varying vec4 vTexCoord;
 varying vec4 vLightStyle;
 void main(void)
 {
-	vec4 texture = texture2D(tTexture, vTexCoord.xy);
-	gl_FragColor = vec4(texture.rgb *
-		mix(1.0, dot(texture2D(tLightmap, vTexCoord.zw), vec4(
-			texture2D(tLightStyle, vec2(vLightStyle.x, 0.0)).a,
-			texture2D(tLightStyle, vec2(vLightStyle.y, 0.0)).a,
-			texture2D(tLightStyle, vec2(vLightStyle.z, 0.0)).a,
-			texture2D(tLightStyle, vec2(vLightStyle.w, 0.0)).a)
-		* 43.828125) + texture2D(tDlight, vTexCoord.zw).a, texture.a), 1.0);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  vec4 texture = texture2D(tTexture, vTexCoord.xy);
+  gl_FragColor = vec4(texture.rgb *
+    mix(1.0, dot(texture2D(tLightmap, vTexCoord.zw), vec4(
+      texture2D(tLightStyle, vec2(vLightStyle.x, 0.0)).a,
+      texture2D(tLightStyle, vec2(vLightStyle.y, 0.0)).a,
+      texture2D(tLightStyle, vec2(vLightStyle.z, 0.0)).a,
+      texture2D(tLightStyle, vec2(vLightStyle.w, 0.0)).a)
+    * 43.828125) + texture2D(tDlight, vTexCoord.zw).a, texture.a), 1.0);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshCharacter">
@@ -185,8 +185,8 @@ attribute vec2 aPosition;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_Position = uOrtho * vec4(aPosition * 8.0 + uDest, 0.0, 1.0);
-	vTexCoord = (aPosition + uCharacter) * 0.0625;
+  gl_Position = uOrtho * vec4(aPosition * 8.0 + uDest, 0.0, 1.0);
+  vTexCoord = (aPosition + uCharacter) * 0.0625;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshCharacter">
@@ -195,7 +195,7 @@ uniform sampler2D tTexture;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_FragColor = texture2D(tTexture, vTexCoord);
+  gl_FragColor = texture2D(tTexture, vTexCoord);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshDlight">
@@ -208,9 +208,9 @@ attribute vec3 aPosition;
 varying float vAlpha;
 void main(void)
 {
-	vec3 position = aPosition * 0.35 * uRadius + uViewAngles * (uOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vAlpha = aPosition.y * -0.2;
+  vec3 position = aPosition * 0.35 * uRadius + uViewAngles * (uOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vAlpha = aPosition.y * -0.2;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshDlight">
@@ -219,7 +219,7 @@ uniform float uGamma;
 varying float vAlpha;
 void main(void)
 {
-	gl_FragColor = vec4(pow(1.0, uGamma), pow(0.5, uGamma), 0.0, vAlpha);
+  gl_FragColor = vec4(pow(1.0, uGamma), pow(0.5, uGamma), 0.0, vAlpha);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshFill">
@@ -229,8 +229,8 @@ attribute vec4 aColor;
 varying vec4 vColor;
 void main(void)
 {
-	gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
-	vColor = aColor;
+  gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
+  vColor = aColor;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshFill">
@@ -238,7 +238,7 @@ precision mediump float;
 varying vec4 vColor;
 void main(void)
 {
-	gl_FragColor = vColor;
+  gl_FragColor = vColor;
 }
 </script>
 <script type="x-shader/x-vertex" id="vshParticle">
@@ -254,11 +254,11 @@ varying vec2 vCoord;
 varying vec3 vColor;
 void main(void)
 {
-	vec2 point = aCoord * aScale;
-	vec3 position = vec3(point.x, 0.0, point.y) + uViewAngles * (aOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vCoord = aCoord;
-	vColor = aColor;
+  vec2 point = aCoord * aScale;
+  vec3 position = vec3(point.x, 0.0, point.y) + uViewAngles * (aOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vCoord = aCoord;
+  vColor = aColor;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshParticle">
@@ -268,10 +268,10 @@ varying vec2 vCoord;
 varying vec3 vColor;
 void main(void)
 {
-	gl_FragColor = vec4(vColor, 1.0 - smoothstep(0.75, 1.0, length(vCoord)));
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  gl_FragColor = vec4(vColor, 1.0 - smoothstep(0.75, 1.0, length(vCoord)));
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshPic">
@@ -281,8 +281,8 @@ attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
-	vTexCoord = aTexCoord;
+  gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
+  vTexCoord = aTexCoord;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshPic">
@@ -291,7 +291,7 @@ uniform sampler2D tTexture;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_FragColor = texture2D(tTexture, vTexCoord);
+  gl_FragColor = texture2D(tTexture, vTexCoord);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshPicTranslate">
@@ -301,8 +301,8 @@ attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
-	vTexCoord = aTexCoord;
+  gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
+  vTexCoord = aTexCoord;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshPicTranslate">
@@ -314,9 +314,9 @@ uniform sampler2D tTrans;
 varying vec2 vTexCoord;
 void main(void)
 {
-	vec4 texture = texture2D(tTexture, vTexCoord);
-	vec4 trans = texture2D(tTrans, vTexCoord);
-	gl_FragColor = vec4(mix(mix(texture.rgb, uTop * trans.x, trans.y), uBottom * trans.z, trans.w), texture.a);
+  vec4 texture = texture2D(tTexture, vTexCoord);
+  vec4 trans = texture2D(tTrans, vTexCoord);
+  gl_FragColor = vec4(mix(mix(texture.rgb, uTop * trans.x, trans.y), uBottom * trans.z, trans.w), texture.a);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshPlayer">
@@ -333,10 +333,10 @@ varying vec2 vTexCoord;
 varying float vLightDot;
 void main(void)
 {
-	vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aTexCoord;
-	vLightDot = dot(aNormal, uLightVec);
+  vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aTexCoord;
+  vLightDot = dot(aNormal, uLightVec);
 }
 </script>
 <script type="x-shader/x-fragment" id="fshPlayer">
@@ -352,14 +352,14 @@ varying vec2 vTexCoord;
 varying float vLightDot;
 void main(void)
 {
-	vec4 texture = texture2D(tTexture, vTexCoord);
-	vec4 player = texture2D(tPlayer, vTexCoord);
-	gl_FragColor = vec4(
-		mix(mix(texture.rgb, uTop * (1.0 / 191.25) * player.x, player.y), uBottom * (1.0 / 191.25) * player.z, player.w)
-		* mix(1.0, vLightDot * uShadeLight + uAmbientLight, texture.a), 1.0);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  vec4 texture = texture2D(tTexture, vTexCoord);
+  vec4 player = texture2D(tPlayer, vTexCoord);
+  gl_FragColor = vec4(
+    mix(mix(texture.rgb, uTop * (1.0 / 191.25) * player.x, player.y), uBottom * (1.0 / 191.25) * player.z, player.w)
+    * mix(1.0, vLightDot * uShadeLight + uAmbientLight, texture.a), 1.0);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshSky">
@@ -370,9 +370,9 @@ attribute vec3 aPosition;
 varying vec2 vTexCoord;
 void main(void)
 {
-	vec3 position = uViewAngles * (aPosition * uScale * 18918.0);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aPosition.xy * uScale.xy * 1.5;
+  vec3 position = uViewAngles * (aPosition * uScale * 18918.0);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aPosition.xy * uScale.xy * 1.5;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshSky">
@@ -384,11 +384,11 @@ uniform sampler2D tAlpha;
 varying vec2 vTexCoord;
 void main(void)
 {
-	vec4 alpha = texture2D(tAlpha, vTexCoord + uTime.x);
-	gl_FragColor = vec4(mix(texture2D(tSolid, vTexCoord + uTime.y).rgb, alpha.rgb, alpha.a), 1.0);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  vec4 alpha = texture2D(tAlpha, vTexCoord + uTime.x);
+  gl_FragColor = vec4(mix(texture2D(tSolid, vTexCoord + uTime.y).rgb, alpha.rgb, alpha.a), 1.0);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshSkyChain">
@@ -398,8 +398,8 @@ uniform mat4 uPerspective;
 attribute vec3 aPosition;
 void main(void)
 {
-	vec3 position = uViewAngles * (aPosition - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vec3 position = uViewAngles * (aPosition - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
 }
 </script>
 <script type="x-shader/x-fragment" id="fshSkyChain">
@@ -418,9 +418,9 @@ attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 void main(void)
 {
-	vec3 position = uViewAngles * (aPosition - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aTexCoord;
+  vec3 position = uViewAngles * (aPosition - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aTexCoord;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshSprite">
@@ -430,10 +430,10 @@ uniform sampler2D tTexture;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_FragColor = texture2D(tTexture, vTexCoord);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  gl_FragColor = texture2D(tTexture, vTexCoord);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshTurbulent">
@@ -447,9 +447,9 @@ attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 void main(void)
 {
-	vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
-	gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
-	vTexCoord = aTexCoord;
+  vec3 position = uViewAngles * (uAngles * aPosition + uOrigin - uViewOrigin);
+  gl_Position = uPerspective * vec4(position.xz, -position.y, 1.0);
+  vTexCoord = aTexCoord;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshTurbulent">
@@ -460,10 +460,10 @@ uniform sampler2D tTexture;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_FragColor = vec4(texture2D(tTexture, vTexCoord + vec2(sin(vTexCoord.t * 3.141593 + uTime), sin(vTexCoord.s * 3.141593 + uTime)) * 0.125).rgb, 1.0);
-	gl_FragColor.r = pow(gl_FragColor.r, uGamma);
-	gl_FragColor.g = pow(gl_FragColor.g, uGamma);
-	gl_FragColor.b = pow(gl_FragColor.b, uGamma);
+  gl_FragColor = vec4(texture2D(tTexture, vTexCoord + vec2(sin(vTexCoord.t * 3.141593 + uTime), sin(vTexCoord.s * 3.141593 + uTime)) * 0.125).rgb, 1.0);
+  gl_FragColor.r = pow(gl_FragColor.r, uGamma);
+  gl_FragColor.g = pow(gl_FragColor.g, uGamma);
+  gl_FragColor.b = pow(gl_FragColor.b, uGamma);
 }
 </script>
 <script type="x-shader/x-vertex" id="vshWarp">
@@ -473,8 +473,8 @@ attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
-	vTexCoord = aTexCoord;
+  gl_Position = uOrtho * vec4(aPosition, 0.0, 1.0);
+  vTexCoord = aTexCoord;
 }
 </script>
 <script type="x-shader/x-fragment" id="fshWarp">
@@ -484,7 +484,7 @@ uniform sampler2D tTexture;
 varying vec2 vTexCoord;
 void main(void)
 {
-	gl_FragColor = texture2D(tTexture, vTexCoord + vec2(sin(vTexCoord.t * 15.70796 + uTime) * 0.003125, sin(vTexCoord.s * 9.817477 + uTime) * 0.005));
+  gl_FragColor = texture2D(tTexture, vTexCoord + vec2(sin(vTexCoord.t * 15.70796 + uTime) * 0.003125, sin(vTexCoord.s * 9.817477 + uTime) * 0.005));
 }
 </script>
 </body>

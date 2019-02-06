@@ -5,11 +5,11 @@ const webpack = require('webpack')
 const resolveDir = dir => '../../' + dir
 
 module.exports = {
-	mode: process.env.NODE_ENV === 'production' ? "production" : "development",
+  mode: process.env.NODE_ENV === 'production' ? "production" : "development",
   devtool: 'none',
-	entry: {
-		app: ['webpack-hot-middleware/client', "./src/app/index.js"]
-	},
+  entry: {
+    app: ['webpack-hot-middleware/client', "./src/app/index.js"]
+  },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
@@ -17,11 +17,11 @@ module.exports = {
       title: 'Output Management'
     })
   ],
-	output: {
-		path: path.join(__dirname, resolveDir("dist/app")),
-		filename: "[name].bundle.js",
-		chunkFilename: "[id].chunk.js"
-	},
+  output: {
+    path: path.join(__dirname, resolveDir("dist/app")),
+    filename: "[name].bundle.js",
+    chunkFilename: "[id].chunk.js"
+  },
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
   },

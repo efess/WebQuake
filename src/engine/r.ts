@@ -31,7 +31,7 @@ export const cvr = {
 } as any
 
 // set on init
-let gl: any = null
+// let gl: any = null
 
 // efrag
 
@@ -55,6 +55,7 @@ export const splitEntityOnNode = function(node)
 
 export const animateLight = function()
 {
+  const gl = GL.getContext()
 	var j;
 	if (cvr.fullbright.value === 0)
 	{
@@ -80,6 +81,7 @@ export const animateLight = function()
 
 export const renderDlights = function()
 {
+  const gl = GL.getContext()
 	if (cvr.flashblend.value === 0)
 		return;
 	++state.dlightframecount;
@@ -91,7 +93,7 @@ export const renderDlights = function()
 	{
 		l = cl.state.dlights[i];
 		if ((l.die < cl.clState.time) || (l.radius === 0.0))
-			continue;
+      continue;
 		if (vec.length([l.origin[0] - state.refdef.vieworg[0], l.origin[1] - state.refdef.vieworg[1], l.origin[2] - state.refdef.vieworg[2]]) < (l.radius * 0.35))
 		{
 			a = l.radius * 0.0003;
@@ -144,6 +146,7 @@ export const markLights = function(light, bit, node)
 
 export const pushDlights = function()
 {
+  const gl = GL.getContext()
 	if (cvr.flashblend.value !== 0)
 		return;
 	var i;
@@ -544,6 +547,7 @@ state.avertexnormals = [
 
 export const drawAliasModel = function(e)
 {
+  const gl = GL.getContext()
 	var clmodel = e.model;
 
 	if (cullBox(
@@ -669,6 +673,7 @@ export const drawAliasModel = function(e)
 
 export const drawEntitiesOnList = function()
 {
+  const gl = GL.getContext()
 	if (cvr.drawentities.value === 0)
 		return;
 	var vis = (cvr.novis.value !== 0) ? mod.novis : mod.leafPVS(state.viewleaf, cl.clState.worldmodel);
@@ -735,6 +740,7 @@ export const drawEntitiesOnList = function()
 
 export const drawViewModel = function()
 {
+  const gl = GL.getContext()
 	if (cvr.drawviewmodel.value === 0)
 		return;
 	if (chase.cvr.active.value !== 0)
@@ -812,6 +818,7 @@ state.perspective = [
 
 export const perspective = function()
 {
+  const gl = GL.getContext()
 	var viewangles = [
 		state.refdef.viewangles[0] * Math.PI / 180.0,
 		(state.refdef.viewangles[1] - 90.0) * Math.PI / -180.0,
@@ -835,7 +842,7 @@ export const perspective = function()
 		cvar.setValue('gamma', 1.0);
 
 	GL.unbindProgram();
-	var i, program;
+  var i, program;
 	for (i = 0; i < GL.state.programs.length; ++i)
 	{
 		program = GL.state.programs[i];
@@ -853,6 +860,7 @@ export const perspective = function()
 
 export const setupGL = function()
 {
+  const gl = GL.getContext()
 	if (state.dowarp === true)
 	{
 		gl.bindFramebuffer(gl.FRAMEBUFFER, state.warpbuffer);
@@ -871,6 +879,7 @@ export const setupGL = function()
 
 export const renderScene = function()
 {
+  const gl = GL.getContext()
 	if (cl.clState.maxclients >= 2)
 		cvar.set('r_fullbright', '0');
 	animateLight();
@@ -895,6 +904,7 @@ export const renderScene = function()
 
 export const renderView = function()
 {
+  const gl = GL.getContext()
 	gl.finish();
 	var time1;
 	if (cvr.speeds.value !== 0)
@@ -919,6 +929,7 @@ export const renderView = function()
 
 export const makeBrushModelDisplayLists = function(m)
 {
+  const gl = GL.getContext()
 	if (m.cmds != null)
 		gl.deleteBuffer(m.cmds);
 	var i, j, k;
@@ -1011,6 +1022,7 @@ export const makeWorldModelDisplayLists = function(m)
 {
 	if (m.cmds != null)
 		return;
+  const gl = GL.getContext()
 	var i, j, k, l;
 	var cmds = [];
 	var texture, leaf, chain, surf, vert, styles = [0.0, 0.0, 0.0, 0.0];
@@ -1143,6 +1155,7 @@ export const makeWorldModelDisplayLists = function(m)
 
 export const initTextures = function()
 {
+  const gl = GL.getContext()
 	var data = new Uint8Array(new ArrayBuffer(256));
 	var i, j;
 	for (i = 0; i < 8; ++i)
@@ -1196,7 +1209,7 @@ export const initTextures = function()
 
 export const init = function()
 {
-	gl = GL.gl
+  const gl = GL.getContext()
 	initTextures();
 
 	cmd.addCommand('timerefresh', timeRefresh_f);
@@ -1287,6 +1300,7 @@ export const init = function()
 
 export const newMap = function()
 {
+  const gl = GL.getContext()
 	var i;
 	for (i = 0; i < 64; ++i)
 		state.lightstylevalue[i] = 12;
@@ -1302,6 +1316,7 @@ export const newMap = function()
 
 export const timeRefresh_f = function()
 {
+  const gl = GL.getContext()
 	gl.finish();
 	var i;
 	var start = sys.floatTime();
@@ -1334,6 +1349,7 @@ state.ramp3 = [0x6d, 0x6b, 6, 5, 4, 3];
 
 export const initParticles = function()
 {
+  const gl = GL.getContext()
 	var i = com.checkParm('-particles');
 	if (i != null)
 	{
@@ -1670,6 +1686,7 @@ export const rocketTrail = function(start, end, type)
 
 export const drawParticles = function()
 {
+  const gl = GL.getContext()
 	GL.streamFlush();
 
 	var program = GL.useProgram('Particle');
@@ -1914,6 +1931,7 @@ export const textureAnimation = function(base)
 
 export const drawBrushModel = function(e)
 {
+  const gl = GL.getContext()
 	var clmodel = e.model;
 
 	if (clmodel.submodel === true)
@@ -2011,6 +2029,7 @@ export const recursiveWorldNode = function(node)
 
 export const drawWorld = function()
 {
+  const gl = GL.getContext()
 	var clmodel = cl.clState.worldmodel;
 	state.currententity = cl.state.entities[0];
 	gl.bindBuffer(gl.ARRAY_BUFFER, clmodel.cmds);
@@ -2171,7 +2190,7 @@ export const buildSurfaceDisplayList = function(fa)
 			_vec = state.currentmodel.vertexes[state.currentmodel.edges[index][0]];
 		else
 			_vec = state.currentmodel.vertexes[state.currentmodel.edges[-index][1]];
-		vert = [vec[0], vec[1], vec[2]];
+		vert = [_vec[0], _vec[1], _vec[2]];
 		if (fa.sky !== true)
 		{
 			s = vec.dotProduct(_vec, texinfo.vecs[0]) + texinfo.vecs[0][3];
@@ -2195,6 +2214,7 @@ export const buildSurfaceDisplayList = function(fa)
 
 export const buildLightmaps = function()
 {
+  const gl = GL.getContext()
 	var i, j;
 
 	state.allocated = [];
@@ -2235,6 +2255,7 @@ export const buildLightmaps = function()
 
 export const warpScreen = function()
 {
+  const gl = GL.getContext()
 	GL.streamFlush();
 	gl.finish();
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -2251,6 +2272,7 @@ export const warpScreen = function()
 
 export const makeSky = function()
 {
+  const gl = GL.getContext()
 	var sin = [0.0, 0.19509, 0.382683, 0.55557, 0.707107, 0.831470, 0.92388, 0.980785, 1.0];
 	var vecs = [], i, j;
 
@@ -2293,6 +2315,7 @@ export const makeSky = function()
 
 export const drawSkyBox = function()
 {
+  const gl = GL.getContext()
 	if (state.drawsky !== true)
 		return;
 
@@ -2355,6 +2378,7 @@ export const drawSkyBox = function()
 
 export const initSky = function(src)
 {
+  const gl = GL.getContext()
 	var i, j, p;
 	var trans = new ArrayBuffer(65536);
 	var trans32 = new Uint32Array(trans);

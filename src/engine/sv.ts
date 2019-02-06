@@ -452,7 +452,7 @@ const createBaseline = function()
 		baseline.skin = svent.v_float[pr.entvars.skin] >> 0;
 		if ((i > 0) && (i <= state.server.maxclients))
 		{
-			// JOE:FIXME: entnum not defined.
+			// JOE:FIXME: entnum not defined. Original code issue
 			baseline.colormap = undefined // entnum;
 			baseline.modelindex = player;
 		}
@@ -526,7 +526,7 @@ export const checkBottom = function(ent)
 	return true;
 };
 
-export const movestep = async function(ent, move, relink)
+export const movestep = async function(ent, _move, relink)
 {
 	var oldorg = ed.vector(ent, pr.entvars.origin);
 	var neworg = [];
@@ -537,8 +537,8 @@ export const movestep = async function(ent, move, relink)
 		var i, enemy = ent.v_int[pr.entvars.enemy], dz;
 		for (i = 0; i <= 1; ++i)
 		{
-			neworg[0] = ent.v_float[pr.entvars.origin] + move[0];
-			neworg[1] = ent.v_float[pr.entvars.origin1] + move[1];
+			neworg[0] = ent.v_float[pr.entvars.origin] + _move[0];
+			neworg[1] = ent.v_float[pr.entvars.origin1] + _move[1];
 			neworg[2] = ent.v_float[pr.entvars.origin2];
 			if ((i === 0) && (enemy !== 0))
 			{
@@ -565,8 +565,8 @@ export const movestep = async function(ent, move, relink)
 		}
 		return 0;
 	}
-	neworg[0] = ent.v_float[pr.entvars.origin] + move[0];
-	neworg[1] = ent.v_float[pr.entvars.origin1] + move[1];
+	neworg[0] = ent.v_float[pr.entvars.origin] + _move[0];
+	neworg[1] = ent.v_float[pr.entvars.origin1] + _move[1];
 	neworg[2] = ent.v_float[pr.entvars.origin2] + 18.0;
 	var end = [neworg[0], neworg[1], neworg[2] - 36.0];
 	trace = move(neworg, mins, maxs, end, 0, ent);
@@ -583,8 +583,8 @@ export const movestep = async function(ent, move, relink)
 	{
 		if ((ent.v_float[pr.entvars.flags] & FL.partialground) === 0)
 			return 0;
-		ent.v_float[pr.entvars.origin] += move[0];
-		ent.v_float[pr.entvars.origin1] += move[1];
+		ent.v_float[pr.entvars.origin] += _move[0];
+		ent.v_float[pr.entvars.origin1] += _move[1];
 		if (relink === true)
 			await linkEdict(ent, true);
 		ent.v_float[pr.entvars.flags] &= (~FL.onground >>> 0);
@@ -955,25 +955,25 @@ const pushMove = async function(pusher, movetime)
 		pusher.v_float[pr.entvars.ltime] += movetime;
 		return;
 	}
-	var move = [
+	var _move = [
 		pusher.v_float[pr.entvars.velocity] * movetime,
 		pusher.v_float[pr.entvars.velocity1] * movetime,
 		pusher.v_float[pr.entvars.velocity2] * movetime
 	];
 	var mins = [
-		pusher.v_float[pr.entvars.absmin] + move[0],
-		pusher.v_float[pr.entvars.absmin1] + move[1],
-		pusher.v_float[pr.entvars.absmin2] + move[2]
+		pusher.v_float[pr.entvars.absmin] + _move[0],
+		pusher.v_float[pr.entvars.absmin1] + _move[1],
+		pusher.v_float[pr.entvars.absmin2] + _move[2]
 	];
 	var maxs = [
-		pusher.v_float[pr.entvars.absmax] + move[0],
-		pusher.v_float[pr.entvars.absmax1] + move[1],
-		pusher.v_float[pr.entvars.absmax2] + move[2]
+		pusher.v_float[pr.entvars.absmax] + _move[0],
+		pusher.v_float[pr.entvars.absmax1] + _move[1],
+		pusher.v_float[pr.entvars.absmax2] + _move[2]
 	];
 	var pushorig = ed.vector(pusher, pr.entvars.origin);
-	pusher.v_float[pr.entvars.origin] += move[0];
-	pusher.v_float[pr.entvars.origin1] += move[1];
-	pusher.v_float[pr.entvars.origin2] += move[2];
+	pusher.v_float[pr.entvars.origin] += _move[0];
+	pusher.v_float[pr.entvars.origin1] += _move[1];
+	pusher.v_float[pr.entvars.origin2] += _move[2];
 	pusher.v_float[pr.entvars.ltime] += movetime;
 	await linkEdict(pusher, false);
 	var e, check, movetype;
@@ -1006,7 +1006,7 @@ const pushMove = async function(pusher, movetime)
 		entorig = ed.vector(check, pr.entvars.origin);
 		moved[moved.length] = [entorig[0], entorig[1], entorig[2], check];
 		pusher.v_float[pr.entvars.solid] = SOLID.not;
-		await pushEntity(check, move);
+		await pushEntity(check, _move);
 		pusher.v_float[pr.entvars.solid] = SOLID.bsp;
 		if (testEntityPosition(check) === true)
 		{
@@ -1465,18 +1465,18 @@ const accelerate = function(wishvel, air, wishdir, wishspeed)
 
 const waterMove = function()
 {
-	var ent = state.player, cmd = host.state.client.cmd;
+	var ent = state.player, _cmd = host.state.client.cmd;
 	var forward = [], right = [];
 	vec.angleVectors(ed.vector(ent, pr.entvars.v_angle), forward, right, null);
 	var wishvel = [
-		forward[0] * cmd.forwardmove + right[0] * cmd.sidemove,
-		forward[1] * cmd.forwardmove + right[1] * cmd.sidemove,
-		forward[2] * cmd.forwardmove + right[2] * cmd.sidemove
+		forward[0] * _cmd.forwardmove + right[0] * _cmd.sidemove,
+		forward[1] * _cmd.forwardmove + right[1] * _cmd.sidemove,
+		forward[2] * _cmd.forwardmove + right[2] * _cmd.sidemove
 	];
-	if ((cmd.forwardmove === 0.0) && (cmd.sidemove === 0.0) && (cmd.upmove === 0.0))
+	if ((_cmd.forwardmove === 0.0) && (_cmd.sidemove === 0.0) && (_cmd.upmove === 0.0))
 		wishvel[2] -= 60.0;
 	else
-		wishvel[2] += cmd.upmove;
+		wishvel[2] += _cmd.upmove;
 	var wishspeed = Math.sqrt(wishvel[0] * wishvel[0] + wishvel[1] * wishvel[1] + wishvel[2] * wishvel[2]);
 	var scale;
 	if (wishspeed > cvr.maxspeed.value)
@@ -1532,13 +1532,13 @@ const waterJump = function()
 const airMove = function()
 {
 	var ent = state.player;
-	var cmd = host.state.client.cmd;
+	var _cmd = host.state.client.cmd;
 	var forward = [], right = [];
     
 	vec.angleVectors(ed.vector(ent, pr.entvars.angles), forward, right, null);
     
-	var fmove = cmd.forwardmove;
-	var smove = cmd.sidemove;
+	var fmove = _cmd.forwardmove;
+	var smove = _cmd.sidemove;
     
 	if ((state.server.time < ent.v_float[pr.entvars.teleport_time]) && (fmove < 0.0))
 		fmove = 0.0;
@@ -1546,7 +1546,7 @@ const airMove = function()
 	var wishvel = [
 		forward[0] * fmove + right[0] * smove,
 		forward[1] * fmove + right[1] * smove,
-		((ent.v_float[pr.entvars.movetype] >> 0) !== MOVE_TYPE.walk) ? cmd.upmove : 0.0];    
+		((ent.v_float[pr.entvars.movetype] >> 0) !== MOVE_TYPE.walk) ? _cmd.upmove : 0.0];    
     
 	var wishdir = [wishvel[0], wishvel[1], wishvel[2]],
         wishspeed = vec.normalize(wishdir);

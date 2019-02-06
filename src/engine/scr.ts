@@ -161,7 +161,7 @@ export const calcRefdef = function()
 		r.state.warpheight = 2048;
 	if ((r.state.oldwarpwidth !== r.state.warpwidth) || (r.state.oldwarpheight !== r.state.warpheight))
 	{
-		const gl = GL.gl
+		const gl = GL.getContext()
 		r.state.oldwarpwidth = r.state.warpwidth;
 		r.state.oldwarpheight = r.state.warpheight;
 		GL.bind(0, r.state.warptexture, false);
@@ -292,6 +292,7 @@ export const endLoadingPlaque = function()
 
 export const updateScreen = function()
 {
+  const gl = GL.getContext()
 	if (state.disabled_for_loading === true)
 	{
 		if (host.state.realtime <= state.disabled_time)
@@ -370,12 +371,12 @@ export const updateScreen = function()
 
 	GL.streamFlush();
 
-	GL.gl.disable(GL.gl.BLEND);
+	gl.disable(gl.BLEND);
 
 	if (state.screenshot === true)
 	{
 		state.screenshot = false;
-    GL.gl.finish();
+    gl.finish();
     // OPEN is not defined, wtf?
 		open(vid.state.mainwindow.toDataURL('image/jpeg'));
 	}

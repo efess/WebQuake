@@ -436,7 +436,6 @@ export const drawFace = function()
 		drawPic(112, 0, state.r_teambord);
 		draw.fill(xofs, vid.state.height - 21, 22, 9, top);
 		draw.fill(xofs, vid.state.height - 12, 22, 9, ((s.colors & 0xf) << 4) + 8);
-		// JOE:FIXME octal literals
 		var num = (top === 8 ? '\x3E\x3E\x3E' : '   ') + s.frags;
 		if (num.length > 3)
 			num = num.substring(num.length - 3);
