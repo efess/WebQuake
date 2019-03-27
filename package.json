@@ -4,14 +4,20 @@
   "description": "Node version of WebQuake",
   "main": "index.js",
   "scripts": {
-    "build": "rimraf ./dist && node build",
+    "build": "rimraf ./dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "node ./build/devserver"
+    "start:dev": "node ./build/devserver",
+    "start:gameserver": "node ./dist/server/game",
+    "debug:gameserver": "nodemon ./dist/server/game"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "nodemon": "^1.18.10",
+    "websocket": "^1.0.28"
+  },
   "devDependencies": {
+    "@types/node": "^11.11.1",
     "chalk": "^2.4.2",
     "dotenv": "^6.2.0",
     "eslint": "^5.12.1",

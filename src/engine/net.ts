@@ -1,20 +1,47 @@
-import * as sys from '../sys'
-import * as con from '../console'
-import * as cl from '../cl'
-import * as host from '../host'
-import * as sv from '../sv'
-import * as webs from './webs'
-import * as loop from './loop'
-import * as cvar from '../cvar'
+import * as sys from './sys'
+import * as con from './console'
+import * as cl from './cl'
+import * as host from './host'
+import * as sv from './sv'
+import * as cvar from './cvar'
+import * as cmd from './cmd'
+import * as com from './com'
+import * as q from './q'
+import ISocket from './interfaces/net/ISocket'
+import IDatagram from './interfaces/net/IDatagram'
+import INetworkDriver from './interfaces/net/INetworkDriver'
+import { listen } from '../server/game/net/webs';
 
-const activeSockets: any[] = [];
+export const activeSockets: ISocket[] = [];
 
 export const cvr = {
 
 } as any
-export const state = {
+
+interface IState {
+	listening: boolean,
+	message: IDatagram,
+	activeconnections: number,
+	drivers: INetworkDriver[],
+	time: number,
+	driverlevel: number,
+	newsocket: ISocket,
+	reps: number,
+	start_time: number,
+	hostport: number
+}
+
+export const state: IState = {
+	listening: false,
   message: {data: new ArrayBuffer(8192), cursize: 0},
-  activeconnections: 0
+	activeconnections: 0,
+	time: 0,
+	driverlevel: 0,
+	newsocket: null,
+	reps: 0,
+	start_time: 0,
+	hostport: 26000,
+	state: false
 } as any
 
 export const newQSocket = function()
@@ -25,11 +52,27 @@ export const newQSocket = function()
 		if (activeSockets[i].disconnected === true)
 			break;
 	}
+
 	activeSockets[i] = {
 		connecttime: state.time,
 		lastMessageTime: state.time,
 		driver: state.driverlevel,
-		address: 'UNSET ADDRESS'
+		address: 'UNSET ADDRESS',
+		disconnected: false,
+		canSend: false,
+		receiveMessage: null,
+		receiveMessageLength: 0,
+		driverdata: null,
+		sendMessage: null,
+		sendMessageLength: 0,
+		lastSendTime: 0,
+		ackSequence: 0,
+		sendSequence: 0,
+		unreliableSendSequence: 0,
+		receiveSequence: 0,
+		unreliableReceiveSequence: 0,
+		addr: '',
+		messages: null
 	};
 	return activeSockets[i];
 };
@@ -41,7 +84,7 @@ export const connect = function(host)
 	if (host === 'local')
 	{
 		state.driverlevel = 0;
-		return loop.connect(host);
+		return state.drivers[state.driverlevel].connect(host);
 	}
 
 	var dfunc, ret;
@@ -247,16 +290,106 @@ export const sendToAll = function(data)
 	return count;
 };
 
-export const init = function()
+const listen_f = () => {
+	if (cmd.state.argv.length !== 2)
+	{
+		con.print('"listen" is "' + (state.listening === true ? 1 : 0) + '"\n');
+		return;
+	}
+	var listening = (q.atoi(cmd.state.argv[1]) !== 0);
+	if (state.listening === listening)
+		return;
+	state.listening = listening;
+	
+	for (state.driverlevel = 0; state.driverlevel < state.drivers.length; ++state.driverlevel)
+	{
+		const driver = state.drivers[state.driverlevel]
+		driver.initialized = driver.init();
+		if (driver.initialized === true)
+			driver.listen();
+	}
+}
+
+const maxPlayers_f = function()
 {
+	if (cmd.state.argv.length !== 2)
+	{
+		con.print('"maxplayers" is "' + sv.state.svs.maxclients + '"\n');
+		return;
+	}
+	if (sv.state.server.active === true)
+	{
+		con.print('maxplayers can not be changed while a server is running.\n');
+		return;
+	}
+	var n = q.atoi(cmd.state.argv[1]);
+	if (n <= 0)
+		n = 1;
+	else if (n > sv.state.svs.maxclientslimit)
+	{
+		n = sv.state.svs.maxclientslimit;
+		con.print('"maxplayers" set to "' + n + '"\n');
+	}
+	if ((n === 1) && (state.listening === true))
+		cmd.state.text += 'listen 0\n';
+	else if ((n >= 2) && (state.listening !== true))
+		cmd.state.text += 'listen 1\n';
+	sv.state.svs.maxclients = n;
+	if (n === 1)
+		cvar.set('deathmatch', '0');
+	else
+		cvar.set('deathmatch', '1');
+};
+
+const port_f = function()
+{
+	if (cmd.state.argv.length !== 2)
+	{
+		con.print('"port" is "' + state.hostport + '"\n');
+		return;
+	}
+	var n = q.atoi(cmd.state.argv[1]);
+	if ((n <= 0) || (n >= 65535))
+	{
+		con.print('Bad value, must be between 1 and 65534\n');
+		return;
+	}
+	state.hostport = n;
+	if (state.listening === true)
+		cmd.state.text += 'listen 0\nlisten 1\n';
+};
+
+export const init = (drivers: INetworkDriver[]) => {
 	state.time = sys.floatTime();
 
 	cvr.messagetimeout = cvar.registerVariable('net_messagetimeout', '300');
 	cvr.hostname = cvar.registerVariable('hostname', 'UNNAMED');
+	cmd.addCommand('listen', listen_f);
+	cmd.addCommand('maxplayers', maxPlayers_f);
+	cmd.addCommand('port', port_f);
 
-	state.drivers = [loop, webs];
+	state.drivers = drivers;
 	for (state.driverlevel = 0; state.driverlevel < state.drivers.length; ++state.driverlevel)
+	{
 		state.drivers[state.driverlevel].initialized = state.drivers[state.driverlevel].init();
+	}
+
+	if (host.state.dedicated) {
+		var i = com.checkParm('-port');
+		if (i != null)
+		{
+			i = q.atoi(com.state.argv[i + 1]);
+			if ((i > 0) && (i <= 65534))
+				state.hostport = i;
+		}
+		state.listening = true;
+		for (state.driverlevel = 0; state.driverlevel < state.drivers.length; ++state.driverlevel)
+		{
+			const driver = state.drivers[state.driverlevel]
+			if (driver.initialized === true)
+				driver.listen();
+		}
+	}
 };
 
 export const shutdown = function()

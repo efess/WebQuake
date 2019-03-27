@@ -12,7 +12,7 @@ import * as key from './key'
 import * as cmd from './cmd'
 import * as cvar from './cvar'
 import * as v from './v'
-import * as webs from './net/webs'
+import * as net from './net'
 
 let gl = null
 const MENU_STATE =
@@ -485,8 +485,10 @@ export const multiPlayer_Draw = function()
   else if (state.multiplayer_cursor === 1)
     drawCharacter(168 + (state.multiplayer_myname.length << 3), 72, 10 + ((host.state.realtime * 4.0) & 1));
 
-  if (webs.state.available !== true)
+  const websDriver = net.state.drivers.find(driver => driver.name === "websocket")
+  if (websDriver && websDriver.available !== true) {
     printWhite(52, 172, 'No Communications Available');
+  }
 };
 
 export const multiPlayer_Key = async function(k)
@@ -534,8 +536,10 @@ export const multiPlayer_Key = async function(k)
     {
     case 0:
       await s.localSound(state.sfx_menu2);
-      if (webs.state.available !== true)
-        return;
+      const websDriver = net.state.drivers.find(driver => driver.name === "websocket")
+      if (websDriver && websDriver.available !== true) {
+        return
+      }
       key.state.dest = key.KEY_DEST.game;
       state.menu = MENU_STATE.none;
       cmd.state.text += 'connect "';

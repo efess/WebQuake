@@ -10,7 +10,7 @@ import * as w from './w'
 import * as key from './key'
 import * as pr from './pr'
 import * as mod from './mod'
-import * as net from './net/index'
+import * as net from './net'
 import * as vid from './vid'
 import * as draw from './draw'
 import * as scr from './scr'
@@ -28,6 +28,8 @@ import * as ed from './ed'
 import * as q from './q'
 import * as vec from './vec'
 import * as sz from './sz'
+import IAssetStore from './interfaces/IAssetStore';
+import INetworkDriver from './interfaces/net/INetworkDriver';
 
 export const state = {
   time3: 0.0,
@@ -58,15 +60,37 @@ export const endGame = async function(message: string)
 
 const findMaxClients = function()
 {
-  sv.state.svs.maxclients = sv.state.svs.maxclientslimit = 1;
+	var i = com.checkParm('-maxplayers');
+	sv.state.svs.maxclients = state.dedicated ? 8 : 1
+	if (i != null)
+	{
+		++i;
+		if (i < com.state.argv.length)
+		{
+			sv.state.svs.maxclients = q.atoi(com.state.argv[i]);
+			if (sv.state.svs.maxclients <= 0)
+                sv.state.svs.maxclients = 8;
+			else if (sv.state.svs.maxclients > 16)
+                sv.state.svs.maxclients = 16;
+		} 
+	}
+
+  sv.state.svs.maxclientslimit = sv.state.svs.maxclients;
   cl.cls.state = cl.ACTIVE.disconnected;
-  sv.state.svs.clients = [{
-    num: 0,
-    message: {data: new ArrayBuffer(8000), cursize: 0, allowoverflow: true},
-    colors: 0,
-    old_frags: 0
-  }];
-  cvar.setValue('deathmatch', 0);
+  sv.state.svs.clients = []
+	for (i = 0; i < sv.state.svs.maxclientslimit; ++i)
+	{
+    sv.state.svs.clients[i] = {
+      num: i,
+      message: {data: new ArrayBuffer(8000), cursize: 0, allowoverflow: true},
+      colors: 0,
+      old_frags: 0
+    };
+  }
+	if (sv.state.svs.maxclients > 1)
+		cvar.setValue('deathmatch', 1);
+	else
+		cvar.setValue('deathmatch', 0);
 };
 
 const clientPrint = function(string)
@@ -147,6 +171,31 @@ const serverFrame = async function()
   await sv.sendClientMessages();
 };
 
+
+export const remoteCommand = function(from, data, password)
+{
+	if ((state.cvr.rcon_password.string.length === 0) || (password !== state.cvr.rcon_password.string))
+	{
+		con.print('Bad rcon from ' + from + ':\n' + data + '\n');
+		return;
+	};
+	con.print('Rcon from ' + from + ':\n' + data + '\n');
+	cmd.executeString(data);
+	return true;
+};
+
+const getConsoleCommands = function()
+{
+	var command;
+	for (;;)
+	{
+		command = sys.getExternalCommand();
+		if (command == null)
+			return;
+		cmd.state.text += command;
+	}
+};
+
 const _frame = async function()
 {
   Math.random();
@@ -167,7 +216,9 @@ const _frame = async function()
   if (cl.cls.state === cl.ACTIVE.connecting)
   {
     await net.checkForResend();
-    scr.updateScreen();
+    if (!state.dedicated){
+      scr.updateScreen();
+    }
     return;
   }
 
@@ -184,42 +235,47 @@ const _frame = async function()
 
   if (cvr.speeds.value !== 0)
     time1 = sys.floatTime();
-  scr.updateScreen();
+  
+  if (!state.dedicated) {
+    scr.updateScreen();
+  }
   if (cvr.speeds.value !== 0)
     time2 = sys.floatTime();
 
-  if (cl.cls.signon === 4)
-  {
-    await s.update(r.state.refdef.vieworg, r.state.vpn, r.state.vright, r.state.vup);
-    cl.decayLights();
+  if (!state.dedicated) {
+    if (cl.cls.signon === 4)
+    {
+      await s.update(r.state.refdef.vieworg, r.state.vpn, r.state.vright, r.state.vup);
+      cl.decayLights();
+    }
+    else
+      await s.update(vec.origin, vec.origin, vec.origin, vec.origin);
+    cdAudio.update();
+  
+    if (cvr.speeds.value !== 0)
+    {
+      pass1 = (time1 - state.time3) * 1000.0;
+      state.time3 = sys.floatTime();
+      pass2 = (time2 - time1) * 1000.0;
+      pass3 = (state.time3 - time2) * 1000.0;
+      tot = Math.floor(pass1 + pass2 + pass3);
+      con.print((tot <= 99 ? (tot <= 9 ? '  ' : ' ') : '')
+        + tot + ' tot '
+        + (pass1 < 100.0 ? (pass1 < 10.0 ? '  ' : ' ') : '')
+        + Math.floor(pass1) + ' server '
+        + (pass2 < 100.0 ? (pass2 < 10.0 ? '  ' : ' ') : '')
+        + Math.floor(pass2) + ' gfx '
+        + (pass3 < 100.0 ? (pass3 < 10.0 ? '  ' : ' ') : '')
+        + Math.floor(pass3) + ' snd\n');
+    }
+  
+    if (state.startdemos === true)
+    {
+      cl.nextDemo();
+      state.startdemos = false;
+    }
   }
-  else
-    await s.update(vec.origin, vec.origin, vec.origin, vec.origin);
-  cdAudio.update();
-
-  if (cvr.speeds.value !== 0)
-  {
-    pass1 = (time1 - state.time3) * 1000.0;
-    state.time3 = sys.floatTime();
-    pass2 = (time2 - time1) * 1000.0;
-    pass3 = (state.time3 - time2) * 1000.0;
-    tot = Math.floor(pass1 + pass2 + pass3);
-    con.print((tot <= 99 ? (tot <= 9 ? '  ' : ' ') : '')
-      + tot + ' tot '
-      + (pass1 < 100.0 ? (pass1 < 10.0 ? '  ' : ' ') : '')
-      + Math.floor(pass1) + ' server '
-      + (pass2 < 100.0 ? (pass2 < 10.0 ? '  ' : ' ') : '')
-      + Math.floor(pass2) + ' gfx '
-      + (pass3 < 100.0 ? (pass3 < 10.0 ? '  ' : ' ') : '')
-      + Math.floor(pass3) + ' snd\n');
-  }
-
-  if (state.startdemos === true)
-  {
-    cl.nextDemo();
-    state.startdemos = false;
-  }
-
+  getConsoleCommands()
   ++state.framecount;
 };
 
@@ -404,20 +460,27 @@ const map_f = async function()
   }
   if (cmd.state.client === true)
     return;
-  cl.cls.demonum = -1;
-  await cl.disconnect();
+  
+  if (!state.dedicated) {
+    cl.cls.demonum = -1;
+    await cl.disconnect();
+  }
   await shutdownServer(false);
   key.state.dest = key.KEY_DEST.game
-  scr.beginLoadingPlaque();
+  if (!state.dedicated) {
+    scr.beginLoadingPlaque();
+  }
   sv.state.svs.serverflags = 0;
   await sv.spawnServer(cmd.state.argv[1]);
-  if (sv.state.server.active !== true)
-    return;
-  cl.cls.spawnparms = '';
-  var i;
-  for (i = 2; i < cmd.state.argv.length; ++i)
-    cl.cls.spawnparms += cmd.state.argv[i] + ' ';
-  await cmd.executeString('connect local', null);
+  if (!state.dedicated) {
+    if (sv.state.server.active !== true)
+      return;
+    cl.cls.spawnparms = '';
+    var i;
+    for (i = 2; i < cmd.state.argv.length; ++i)
+      cl.cls.spawnparms += cmd.state.argv[i] + ' ';
+    await cmd.executeString('connect local', null);
+  }
 };
 
 const changelevel_f = async function()
@@ -444,7 +507,9 @@ const restart_f = async function()
 
 const reconnect_f = function()
 {
-  scr.beginLoadingPlaque();
+  if (!state.dedicated) {
+    scr.beginLoadingPlaque();
+  }
   cl.cls.signon = 0;
 };
 
@@ -1332,7 +1397,9 @@ export const error = async function(error: string)
     sys.error('Host.Error: recursively entered');
   }
   state.inerror = true;
-  scr.endLoadingPlaque();
+  if (!state.dedicated) {
+    scr.endLoadingPlaque();
+  }
   con.print('Host.Error: ' + error + '\n');
   if (sv.state.server.active === true)
     await shutdownServer(false);
@@ -1359,35 +1426,42 @@ const initLocal = () => {
   cvr.coop = cvar.registerVariable('coop', '0');
   cvr.pausable = cvar.registerVariable('pausable', '1');
   cvr.temp1 = cvar.registerVariable('temp1', '0');
+  cvr.rcon_password = cvar.registerVariable('rcon_password', 'abcd');
   findMaxClients();
 }
 
-export const init = async function()
+export const init = async function(
+  dedicated: boolean,
+  assetStore: IAssetStore,
+  netDrivers: INetworkDriver[])
 {
+  state.dedicated = dedicated
   state.oldrealtime = sys.floatTime();
   cmd.init();
   v.init();
   chase.init();
-  await com.init();
+  await com.init(assetStore);
   initLocal();
   await w.loadWadFile('gfx.wad');
   key.init();
   con.init();
   pr.init();
   mod.init();
-  net.init();
+  net.init(netDrivers);
   sv.init();
   con.print(def.timedate);
-  await vid.init();
-  await draw.init();
-  await scr.init();
-  r.init();
-  await s.init();
-  await m.init();
-  await cdAudio.init();
-  await sbar.init();
-  await cl.init();
-  input.init();
+  if (!dedicated) {
+    await vid.init();
+    await draw.init();
+    await scr.init();
+    r.init();
+    await s.init();
+    await m.init();
+    await cdAudio.init();
+    await sbar.init();
+    await cl.init();
+    input.init();
+  }
   cmd.state.text = 'exec quake.rc\n' + cmd.state.text;
   state.initialized = true;
   sys.print('========Quake Initialized=========\n');

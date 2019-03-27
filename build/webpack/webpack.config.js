@@ -8,7 +8,7 @@ module.exports = {
   mode: process.env.NODE_ENV === 'production' ? "production" : "development",
   devtool: 'none',
   entry: {
-    app: ['webpack-hot-middleware/client', "./src/app/index.js"]
+    app: ['webpack-hot-middleware/client', "./src/app/game/index.ts"]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

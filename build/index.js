@@ -22,5 +22,5 @@ webpack(webpackConf, (err, stats) => {
     chunkModules: false
   }) + '\n\n')
 
-  console.log(chalk.cyan('Build complete!'))
+  console.log(chalk.cyan('App build complete!'))
 })

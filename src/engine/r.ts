@@ -2388,22 +2388,24 @@ export const initSky = function(src)
 		for (j = 0; j < 128; ++j)
 			trans32[(i << 7) + j] = com.state.littleLong(vid.d_8to24table[src[(i << 8) + j + 128]] + 0xff000000);
 	}
-	GL.bind(0, state.solidskytexture, false);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
-	gl.generateMipmap(gl.TEXTURE_2D);
-
-	for (i = 0; i < 128; ++i)
-	{
-		for (j = 0; j < 128; ++j)
+	if (gl) {
+		GL.bind(0, state.solidskytexture, false);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
+		gl.generateMipmap(gl.TEXTURE_2D);
+	
+		for (i = 0; i < 128; ++i)
 		{
-			p = (i << 8) + j;
-			if (src[p] !== 0)
-				trans32[(i << 7) + j] = com.state.littleLong(vid.d_8to24table[src[p]] + 0xff000000);
-			else
-				trans32[(i << 7) + j] = 0;
+			for (j = 0; j < 128; ++j)
+			{
+				p = (i << 8) + j;
+				if (src[p] !== 0)
+					trans32[(i << 7) + j] = com.state.littleLong(vid.d_8to24table[src[p]] + 0xff000000);
+				else
+					trans32[(i << 7) + j] = 0;
+			}
 		}
+		GL.bind(0, state.alphaskytexture, false);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
+		gl.generateMipmap(gl.TEXTURE_2D);
 	}
-	GL.bind(0, state.alphaskytexture, false);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
-	gl.generateMipmap(gl.TEXTURE_2D);
 };

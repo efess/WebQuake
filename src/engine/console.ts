@@ -8,6 +8,7 @@ import * as vid from './vid'
 import * as cl from './cl'
 import * as mod from './mod'
 import * as draw from './draw'
+import * as sys from './sys'
 import * as scr from './scr'
 import * as s from './s'
 import * as m from './m'
@@ -147,6 +148,10 @@ export const dPrint = function(_msg: string)
 
 export const print = async function(_msg: string)
 {
+  if (host.state.dedicated) {
+    sys.print(_msg)
+    return
+  }
   if (state.debuglog === true)
   {
     var data = await com.loadTextFile('qconsole.log');

@@ -260,8 +260,10 @@ export const loadTextures = function(buf)
     }
     else
     {
-      glt = GL.loadTexture(tx.name, tx.width, tx.height, new Uint8Array(buf, miptexofs + view.getUint32(miptexofs + 24, true), tx.width * tx.height));
-      tx.texturenum = glt.texnum;
+      if (GL.getContext()) {
+        glt = GL.loadTexture(tx.name, tx.width, tx.height, new Uint8Array(buf, miptexofs + view.getUint32(miptexofs + 24, true), tx.width * tx.height));
+        tx.texturenum = glt.texnum;
+      }
       if (tx.name.charCodeAt(0) === 42)
         tx.turbulent = true;
     }
@@ -892,17 +894,19 @@ export const loadAllSkins = function(buffer, inmodel)
     inmodel += 4;
     if (model.getUint32(inmodel - 4, true) === 0)
     {
-      skin = new Uint8Array(buffer, inmodel, skinsize);
-      floodFillSkin(skin);
-      loadmodel.skins[i] = {
-        group: false,
-        texturenum: GL.loadTexture(loadmodel.name + '_' + i,
-          loadmodel.skinwidth,
-          loadmodel.skinheight,
-          skin)
-      };
-      if (loadmodel.player === true)
-        translatePlayerSkin(new Uint8Array(buffer, inmodel, skinsize), loadmodel.skins[i]);
+      if (GL.getContext()) {
+        skin = new Uint8Array(buffer, inmodel, skinsize);
+        floodFillSkin(skin);
+        loadmodel.skins[i] = {
+          group: false,
+          texturenum: GL.loadTexture(loadmodel.name + '_' + i,
+            loadmodel.skinwidth,
+            loadmodel.skinheight,
+            skin)
+        };
+        if (loadmodel.player === true)
+          translatePlayerSkin(new Uint8Array(buffer, inmodel, skinsize), loadmodel.skins[i]);
+      }
       inmodel += skinsize;
     }
     else
@@ -922,14 +926,16 @@ export const loadAllSkins = function(buffer, inmodel)
       }
       for (j = 0; j < numskins; ++j)
       {
-        skin = new Uint8Array(buffer, inmodel, skinsize);
-        floodFillSkin(skin);
-        group.skins[j].texturenum = GL.loadTexture(loadmodel.name + '_' + i + '_' + j,
-          loadmodel.skinwidth,
-          loadmodel.skinheight,
-          skin);
-        if (loadmodel.player === true)
-          translatePlayerSkin(new Uint8Array(buffer, inmodel, skinsize), group.skins[j]);
+        if (GL.getContext()) {
+          skin = new Uint8Array(buffer, inmodel, skinsize);
+          floodFillSkin(skin);
+          group.skins[j].texturenum = GL.loadTexture(loadmodel.name + '_' + i + '_' + j,
+            loadmodel.skinwidth,
+            loadmodel.skinheight,
+            skin);
+          if (loadmodel.player === true)
+            translatePlayerSkin(new Uint8Array(buffer, inmodel, skinsize), group.skins[j]);
+        }
         inmodel += skinsize;
       }
       loadmodel.skins[i] = group;
@@ -1145,13 +1151,16 @@ export const loadAliasModel = function(buffer)
     }
   }
   const gl = GL.getContext()
-  loadmodel.cmds = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, loadmodel.cmds);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cmds), gl.STATIC_DRAW);
+  if (gl) {
+    loadmodel.cmds = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, loadmodel.cmds);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cmds), gl.STATIC_DRAW);
+  }
 };
 
 export const loadSpriteFrame = function(identifier, buffer, inframe, frame)
 {
+  const gl = GL.getContext()
   var i;
 
   var model = new DataView(buffer);
@@ -1200,7 +1209,9 @@ export const loadSpriteFrame = function(identifier, buffer, inframe, frame)
   if ((scaled_width !== frame.width) || (scaled_height !== frame.height))
   {
     size = scaled_width * scaled_height;
-    data = GL.resampleTexture(data, frame.width, frame.height, scaled_width, scaled_height);
+    if (gl) {
+      data = GL.resampleTexture(data, frame.width, frame.height, scaled_width, scaled_height);
+    }
   }
 
   var trans = new ArrayBuffer(size << 2);
@@ -1210,15 +1221,16 @@ export const loadSpriteFrame = function(identifier, buffer, inframe, frame)
     if (data[i] !== 255)
       trans32[i] = com.state.littleLong(vid.d_8to24table[data[i]] + 0xff000000);
   }
-  const gl = GL.getContext()
-  glt = {texnum: gl.createTexture(), identifier: identifier, width: frame.width, height: frame.height};
-  GL.bind(0, glt.texnum);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, scaled_width, scaled_height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
-  gl.generateMipmap(gl.TEXTURE_2D);
-  gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, GL.state.filter_min);
-  gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, GL.state.filter_max);
-  GL.state.textures[GL.state.textures.length] = glt;
-  frame.texturenum = glt.texnum;
+  if (gl) {
+    glt = {texnum: gl.createTexture(), identifier: identifier, width: frame.width, height: frame.height};
+    GL.bind(0, glt.texnum);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, scaled_width, scaled_height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trans));
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, GL.state.filter_min);
+    gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, GL.state.filter_max);
+    GL.state.textures[GL.state.textures.length] = glt;
+    frame.texturenum = glt.texnum;
+  }
   return inframe + 16 + frame.width * frame.height;
 }
 

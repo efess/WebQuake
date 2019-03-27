@@ -7,6 +7,7 @@ import * as con from './console'
 import * as mod from './mod'
 import * as draw from './draw'
 import * as scr from './scr'
+import * as shaders from './shaders'
 
 import './glDebugger'
 
@@ -270,13 +271,13 @@ export const createProgram = function(identifier, uniforms, attribs, textures)
   } as any;
 
   var vsh = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vsh, document.getElementById('vsh' + identifier).innerText);
+  gl.shaderSource(vsh, shaders['vsh' + identifier]);
   gl.compileShader(vsh);
   if (gl.getShaderParameter(vsh, gl.COMPILE_STATUS) !== true)
     sys.error('Error compiling shader: ' + gl.getShaderInfoLog(vsh));
 
   var fsh = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fsh, document.getElementById('fsh' + identifier).innerText);
+  gl.shaderSource(fsh, shaders['fsh' + identifier]);
   gl.compileShader(fsh);
   if (gl.getShaderParameter(fsh, gl.COMPILE_STATUS) !== true)
     sys.error('Error compiling shader: ' + gl.getShaderInfoLog(fsh));

@@ -1,18 +1,27 @@
-import * as net from './index'
 import * as sys from '../sys'
+import * as net from '../../../engine/net'
+import ISocket from '../../../engine/interfaces/net/ISocket'
+import IDatagram from '../../../engine/interfaces/net/IDatagram'
 
-export const state = {
+export const name: string = "loop"
+export var initialized: boolean = false;
+export var available: boolean = true;
+
+export const state: {client: ISocket, server: ISocket, localconnectpending: boolean} = {
   client: null,
   server: null,
-  localconnectpending: false
+	localconnectpending: false
 } as any
 
-export const init = function()
-{
+export const init = () => {
 	return true;
 };
 
-export const connect = function(host)
+export const listen = () => {
+
+}
+
+export const connect = function(host: string)
 {
 	if (host !== 'local')
 		return;
@@ -55,7 +64,7 @@ export const checkNewConnections = function()
 	return state.server;
 };
 
-export const getMessage = function(sock)
+export const getMessage = function(sock: ISocket)
 {
 	if (sock.receiveMessageLength === 0)
 		return 0;
@@ -63,7 +72,7 @@ export const getMessage = function(sock)
 	var length = sock.receiveMessage[1] + (sock.receiveMessage[2] << 8);
 	if (length > net.state.message.data.byteLength)
 		sys.error('Loop.GetMessage: overflow');
-	net.state.message.cursize = length;
+		net.state.message.cursize = length;
 	(new Uint8Array(net.state.message.data)).set(sock.receiveMessage.subarray(3, length + 3));
 	sock.receiveMessageLength -= length;
 	if (sock.receiveMessageLength >= 4)
@@ -78,7 +87,7 @@ export const getMessage = function(sock)
 	return ret;
 };
 
-export const sendMessage = function(sock, data)
+export const sendMessage = function(sock: ISocket, data: IDatagram)
 {
 	if (sock.driverdata == null)
 		return -1;
@@ -95,7 +104,7 @@ export const sendMessage = function(sock, data)
 	return 1;
 };
 
-export const sendUnreliableMessage = function(sock, data)
+export const sendUnreliableMessage = function(sock: ISocket, data: IDatagram)
 {
 	if (sock.driverdata == null)
 		return -1;
@@ -111,13 +120,13 @@ export const sendUnreliableMessage = function(sock, data)
 	return 1;
 };
 
-export const canSendMessage = function(sock)
+export const canSendMessage = function(sock: ISocket)
 {
 	if (sock.driverdata != null)
 		return sock.canSend;
 };
 
-export const close = function(sock)
+export const close = function(sock: ISocket)
 {
 	if (sock.driverdata != null)
 		sock.driverdata.driverdata = null;
@@ -127,4 +136,12 @@ export const close = function(sock)
 		state.client = null;
 	else
 		state.server = null;
+};
+
+export const checkForResend = function()
+{
+	if (net.state.newsocket.driverdata.readyState === 1)
+		return 1;
+	if (net.state.newsocket.driverdata.readyState !== 0)
+		return -1;
 };

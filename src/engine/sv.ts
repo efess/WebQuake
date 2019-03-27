@@ -9,7 +9,7 @@ import * as com from './com'
 import * as protocol from './protocol'
 import * as def from './def'
 import * as cmd from './cmd'
-import * as net from './net/index'
+import * as net from './net'
 import * as scr from './scr'
 import * as ed from './ed'
 import * as q from './q'
@@ -753,7 +753,7 @@ const checkVelocity = function(ent)
 	}
 };
 
-const runThink = async function(ent)
+async function runThink(ent)
 {
 	var thinktime = ent.v_float[pr.entvars.nextthink];
 	if ((thinktime <= 0.0) || (thinktime > (state.server.time + host.state.frametime)))
@@ -1676,6 +1676,7 @@ const readClientMessage = async function()
 			if (_cmd === protocol.CLC.stringcmd)
 			{
 				s = msg.readString();
+				console.log('read -> ' + s)
 				for (i = 0; i < cmds.length; ++i)
 				{
 					if (s.substring(0, cmds[i].length).toLowerCase() !== cmds[i])
@@ -2439,6 +2440,7 @@ export const spawnServer = async function(server)
 	state.server.active = true;
 	state.server.loading = false;
 	host.state.frametime = 0.1;
+	
 	await physics();
 	await physics();
 	createBaseline();
@@ -2503,7 +2505,6 @@ export const sendClientMessages = async function()
 	for (i = 1; i < state.server.num_edicts; ++i)
 		state.server.edicts[i].v_float[pr.entvars.effects] &= (~mod.EFFECTS.muzzleflash >>> 0);
 };
-
 export const physics = async function()
 {
 	pr.state.globals_int[pr.globalvars.self] = 0;

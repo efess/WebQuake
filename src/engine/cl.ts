@@ -9,7 +9,7 @@ import * as sv from './sv'
 import * as chase from './chase'
 import * as sys from './sys'
 import * as v from './v'
-import * as net from './net/index'
+import * as net from './net'
 import * as cvar from './cvar'
 import * as scr from './scr'
 import * as r from './r'
@@ -19,7 +19,6 @@ import * as input from './input'
 import * as protocol from './protocol'
 import * as q from './q'
 import * as vec from './vec'
-import * as webs from './net/webs'
 
 export const cls = {
   state: 0,
@@ -555,7 +554,7 @@ export const rcon_f = function()
   var to;
   if ((cls.state === ACTIVE.connected) && (cls.netcon != null))
   {
-    if (net.state.drivers[cls.netcon.driver] === webs)
+    if (net.state.drivers[cls.netcon.driver].name === "websocket")
       to = cls.netcon.address.substring(5);
   }
   if (to == null)

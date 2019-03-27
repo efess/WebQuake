@@ -1,28 +1,32 @@
-import * as net from './index'
+import ISocket from '../../../engine/interfaces/net/ISocket'
+import IDatagram from '../../../engine/interfaces/net/IDatagram'
+import * as net from '../../../engine/net'
 
-export const state = {
-  available: false
-}
-export const init = function()
-{
+export const name: string = "websocket"
+export var initialized: boolean = false;
+export var available: boolean = false;
+
+export const init = () => { 
+	if(typeof window === "undefined")
+		return
 	if ((window['WebSocket'] == null) || (document.location.protocol === 'https:'))
 		return;
-	state.available = true;
+	available = true;
 	return true;
 };
-
-export const connect = function(host)
+export const listen = () => {}
+export const connect = (host: string): any =>
 {
 	if (host.length <= 5)
-		return;
+		return null
 	if (host.charCodeAt(5) === 47)
-		return;
+		return null
 	if (host.substring(0, 5) !== 'ws://')
-		return;
+		return null
 	host = 'ws://' + host.split('/')[2];
 	var sock = net.newQSocket();
 	sock.disconnected = true;
-	sock.receiveMessage = [];
+	sock.receiveMessage = []
 	sock.address = host;
 	try
 	{
@@ -30,7 +34,7 @@ export const connect = function(host)
 	}
 	catch (e)
 	{
-		return;
+		return null;
 	}
 	sock.driverdata.data_socket = sock;
 	sock.driverdata.binaryType = 'arraybuffer';
@@ -40,11 +44,11 @@ export const connect = function(host)
 	return 0;
 };
 
-export const checkNewConnections = function()
-{
-};
+export const checkNewConnections = (): ISocket => {
+	return null
+}
 
-export const getMessage = function(sock)
+export const getMessage = function(sock: ISocket)
 {
 	if (sock.driverdata == null)
 		return -1;
@@ -58,7 +62,7 @@ export const getMessage = function(sock)
 	return message[0];
 };
 
-export const sendMessage = function(sock, data)
+export const sendMessage = function(sock: ISocket, data: IDatagram)
 {
 	if (sock.driverdata == null)
 		return -1;
@@ -71,7 +75,7 @@ export const sendMessage = function(sock, data)
 	return 1;
 };
 
-export const sendUnreliableMessage = function(sock, data)
+export const sendUnreliableMessage = function(sock: ISocket, data: IDatagram)
 {
 	if (sock.driverdata == null)
 		return -1;
@@ -84,7 +88,7 @@ export const sendUnreliableMessage = function(sock, data)
 	return 1;
 };
 
-export const canSendMessage = function(sock)
+export const canSendMessage = function(sock: ISocket)
 {
 	if (sock.driverdata == null)
 		return;
@@ -92,7 +96,7 @@ export const canSendMessage = function(sock)
 		return true;
 };
 
-export const close = function(sock)
+export const close = function(sock: ISocket)
 {
 	if (sock.driverdata != null)
 		sock.driverdata.close(1000);

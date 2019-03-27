@@ -1,5 +1,5 @@
 import * as sz from './sz'
-import * as net from './net/index'
+import * as net from './net'
 import * as q from './q'
 
 export const state = {
@@ -60,6 +60,9 @@ export const readChar = function()
 	{
 		state.badread = true;
 		return -1;
+	}
+	if (state.readcount === 7) {
+		debugger
 	}
 	var c = (new Int8Array(net.state.message.data, state.readcount, 1))[0];
 	++state.readcount;
