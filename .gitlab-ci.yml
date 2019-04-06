@@ -1,0 +1,32 @@
+stages:
+  - build
+  - push
+  - deploy
+
+variables:
+  CONTAINER_FRONTEND_REF_IMAGE: registry.netquake.io/webquake-web:$CI_COMMIT_REF_SLUG
+  CONTAINER_FRONTEND_RELEASE_IMAGE: registry.netquake.io/webquake-web:latest
+
+  CONTAINER_SERVER_REF_IMAGE: registry.netquake.io/webquake-server:$CI_COMMIT_REF_SLUG
+  CONTAINER_SERVER_RELEASE_IMAGE: registry.netquake.io/webquake-server:latest
+
+build_job:
+  image: node:carbon
+  stage: build
+  script:
+    - npm --unsafe-perm install
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+
+push_job:
+  image: docker:latest
+  services:
+    - docker:dind
+  stage: push
+  script:
+    - docker build -t $CONTAINER_FRONTEND_REF_IMAGE -f Dockerfile.frontend .
+    - docker push $CONTAINER_FRONTEND_REF_IMAGE
+    - docker build -t $CONTAINER_SERVER_REF_IMAGE -f Dockerfile.dedicated .
+    - docker push $CONTAINER_SERVER_REF_IMAGE

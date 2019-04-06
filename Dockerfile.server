@@ -1,0 +1,21 @@
+FROM node:carbon
+
+RUN mkdir -p /usr/app
+
+# Set the working directory to /app
+WORKDIR /usr/app
+
+COPY package.json /usr/app/
+
+RUN npm install --only=production
+
+# Copy all applicable directories
+COPY ./dist /usr/app/dist
+
+# Make game port available to the world outside this container
+EXPOSE 26000
+
+# Define environment variable
+# ENV NAME World
+
+CMD ["npm", "run", "start:gameserver"]

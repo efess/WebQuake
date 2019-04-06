@@ -4,7 +4,7 @@
   "description": "Node version of WebQuake",
   "main": "index.js",
   "scripts": {
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && node ./build && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "node ./build/devserver",
     "start:gameserver": "node ./dist/server/game",
@@ -13,6 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "websocket": "^1.0.28"
+  },
+  "devDependencies": {
+    "@types/node": "^11.11.1",
     "node-sass": "^4.11.0",
     "nodemon": "^1.18.10",
     "pug": "^2.0.3",
@@ -24,10 +28,6 @@
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
     "vuex": "^3.1.0",
-    "websocket": "^1.0.28"
-  },
-  "devDependencies": {
-    "@types/node": "^11.11.1",
     "chalk": "^2.4.2",
     "css-loader": "^2.1.1",
     "dotenv": "^6.2.0",

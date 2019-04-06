@@ -1,0 +1,14 @@
+FROM nginx
+
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy all applicable directories
+COPY ./dist /usr/app/dist
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Define environment variable
+# ENV NAME World
+
+CMD ["npm", "start"]
