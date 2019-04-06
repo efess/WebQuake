@@ -2,6 +2,7 @@ import * as com from '../../engine/com'
 import * as host from '../../engine/host'
 import * as key from '../../engine/key'
 import * as vid from '../../engine/vid'
+import * as GL from '../../engine/gl'
 import * as con from '../../engine/console'
 import * as q from '../../engine/q'
 import * as _assetStore from './assetStore'
@@ -12,10 +13,9 @@ export const assetStore = _assetStore
 export const state = {
   looping: false,
   scantokey: [],
-	oldtime: 0.0
+	oldtime: 0.0,
+	onQuit: null
 } as any
-
-export const init = () => {}
 
 const onbeforeunload = function()
 {
@@ -119,7 +119,7 @@ const onwheel = async function(e)
 };
 
 
-window.onload = async function()
+export const init = async () =>
 {
 	if ((document.location.protocol !== 'http:') && (document.location.protocol !== 'https:'))
 		error('Protocol is ' + document.location.protocol + ', not http: or https:');
@@ -274,12 +274,15 @@ export const quit = function()
 		window[eventNames[i]] = null;
 	host.shutdown();
 	document.body.style.cursor = 'auto';
-	vid.state.mainwindow.style.display = 'none';
-	if (com.cvr.registered.value !== 0)
-		document.getElementById('end2').style.display = 'inline';
-	else
-		document.getElementById('end1').style.display = 'inline';
-	// throw new Error;
+	if (state.hooks && state.hooks.quit) {
+		state.hooks.quit()
+	}
+	// vid.state.mainwindow.style.display = 'none';
+	// if (com.cvr.registered.value !== 0)
+	// 	document.getElementById('end2').style.display = 'inline';
+	// else
+	// 	document.getElementById('end1').style.display = 'inline';
+	// // throw new Error;
 };
 
 export const error = function(text)
@@ -307,4 +310,8 @@ export const error = function(text)
 
 export const getExternalCommand = () => {
 	return null
+}
+
+export const registerHooks = (hooks) => {
+	state.hooks = hooks
 }

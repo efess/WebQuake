@@ -13,7 +13,7 @@ import * as crc from './crc'
 const version = 6
 const progheader_crc = 5927;
 
-export const state = {
+export let state = {
   strings: null,
   globals_int: null,
   globals_float: null,
@@ -218,6 +218,18 @@ export const entvars = {
 	noise3: 104 // string
 } as any;
 
+const initState = () => {
+	state = {
+		strings: null,
+		globals_int: null,
+		globals_float: null,
+		depth: null,
+		functions: null,
+		argc: null,
+		edict_size: 0,
+		trace: false
+	}
+}
 // cmds
 
 export const checkEmptyString = async function(s)
@@ -444,6 +456,7 @@ export const loadProgs = async function()
 
 export const init = function()
 {
+	initState()
 	cmd.addCommand('edict', ed.printEdict_f);
 	cmd.addCommand('edicts', ed.printEdicts);
 	cmd.addCommand('edictcount', ed.count);

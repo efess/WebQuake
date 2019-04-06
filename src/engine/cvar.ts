@@ -4,7 +4,7 @@ import * as host from './host'
 import * as q from './q'
 import * as sv from './sv'
 
-export const vars = [] as any
+export var vars = [] as any
 
 export const findVar = function(name)
 {
@@ -99,3 +99,7 @@ export const writeVariables = function()
   }
   return f.join('');
 };
+
+export const init = () =>  {
+  vars = []
+}

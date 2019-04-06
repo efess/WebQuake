@@ -8,7 +8,7 @@ import * as mod from './mod'
 import * as q from './q'
 import * as vec from './vec'
 
-export const state = {
+export let state = {
 } as any
 
 let channels = [];
@@ -22,13 +22,15 @@ const listener_forward = [0.0, 0.0, 0.0];
 const listener_right = [0.0, 0.0, 0.0];
 const listener_up = [0.0, 0.0, 0.0];
 
-const known_sfx = [];
-
-
+let known_sfx = [];
 export const cvr = {} as any
 
 export const init = async function()
 {
+	state = {}
+	known_sfx = []
+	channels = []
+	context = null
 	con.print('\nSound Initialization\n');
 	cmd.addCommand('play', play);
 	cmd.addCommand('playvol', playVol);

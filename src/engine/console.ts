@@ -196,6 +196,9 @@ export const print = async function(_msg: string)
 
 export const init = function()
 {
+  state.backscroll = 0
+  state.current = 0
+  state.text = []
   state.debuglog = (com.checkParm('-condebug') != null);
   if (state.debuglog === true)
     com.writeTextFile('qconsole.log', '');

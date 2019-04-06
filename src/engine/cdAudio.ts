@@ -145,10 +145,10 @@ export const init = async function()
     track = '/media/quake' + (i <= 9 ? '0' : '') + i + '.ogg';
     for (j = com.state.searchpaths.length - 1; j >= 0; --j)
     {
-      const exists = await trackExists(com.state.searchpaths[j].filename + track) as any
+      const exists = await trackExists(com.state.searchpaths[j].dir + track) as any
       if ((exists.status >= 200) && (exists.status <= 299))
       {
-        known[i - 1] = com.state.searchpaths[j].filename + track;
+        known[i - 1] = com.state.searchpaths[j].dir + track;
         break;
       }
     }

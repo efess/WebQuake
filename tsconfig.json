@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": [
-      "es2015",
+      "es2017",
       "dom"
     ],
     "outDir": "./dist/",
@@ -10,6 +10,7 @@
     "module": "commonjs",
     "target": "esNext",
     "allowJs": true,
+    "experimentalDecorators": true
   },
   "include": [
     "src/server/game/*.ts"

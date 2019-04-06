@@ -37,7 +37,7 @@ export const VERSION = {
   alias: 6
 };
 
-const known: any = [];
+let known: any = [];
 
 //
 var loadmodel: any = null
@@ -46,11 +46,13 @@ var filledcolor = 0
 
 export const init = function()
 {
+  filledcolor = 0
+  loadmodel = null
+  known = []
   var i;
   for (i = 0; i < 1024; ++i)
     novis[i] = 0xff;
 
-  filledcolor = 0;
   for (i = 0; i <= 255; ++i)
   {
     if (vid.d_8to24table[i] === 0)

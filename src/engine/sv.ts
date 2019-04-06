@@ -18,7 +18,7 @@ import * as sz from './sz'
 import * as v from './v'
 import * as pf from './pf'
 
-export const state = {
+export let state = {
   fatpvs: [],
   fatbytes: 0,
   clientdatagram: {data: new ArrayBuffer(1024), cursize: 0},
@@ -88,6 +88,30 @@ export const FL = {
 	jumpreleased: 4096
 };
 
+const initState = () => {
+	state = {
+		fatpvs: [],
+		fatbytes: 0,
+		clientdatagram: {data: new ArrayBuffer(1024), cursize: 0},
+		server: {
+			num_edicts: 0,
+			datagram: {data: new ArrayBuffer(1024), cursize: 0},
+			reliable_datagram: {data: new ArrayBuffer(1024), cursize: 0},
+			signon: {data: new ArrayBuffer(8192), cursize: 0},
+			active: false,
+			loading: false
+		},
+		nop: {
+			data: new ArrayBuffer(4),
+			cursize: 1
+		},
+		reconnect: {
+			data: new ArrayBuffer(128),
+			cursize: 0
+		},
+		svs: {}
+	} as any;
+}
 // main
 
 export const startParticle = function(org, dir, color, count)
@@ -2588,6 +2612,7 @@ export const getClientName = function(client)
 
 export const init = function()
 {
+	initState()
 	cvr.maxvelocity = cvar.registerVariable('sv_maxvelocity', '2000');
 	cvr.gravity = cvar.registerVariable('sv_gravity', '800', false, true);
 	cvr.friction = cvar.registerVariable('sv_friction', '4', false, true);

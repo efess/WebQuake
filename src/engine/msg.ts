@@ -61,9 +61,6 @@ export const readChar = function()
 		state.badread = true;
 		return -1;
 	}
-	if (state.readcount === 7) {
-		debugger
-	}
 	var c = (new Int8Array(net.state.message.data, state.readcount, 1))[0];
 	++state.readcount;
 	return c;

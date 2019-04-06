@@ -1,5 +1,5 @@
 import { init } from "../sys";
-import IAssetStore from "./IAssetStore";
+import IAssetStore from "./store/IAssetStore";
 
 export interface ISys {
   print: (text: string) => void,

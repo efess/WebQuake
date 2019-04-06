@@ -5,7 +5,7 @@ import * as com from './com'
 import * as cl from './cl'
 import * as protocol from './protocol'
 
-export const state = {
+export let state = {
   wait: false,
   alias: [],
   text: '',
@@ -14,6 +14,16 @@ export const state = {
   client: null
 } as any
 
+const initState = () => {
+  state = {
+    wait: false,
+    alias: [],
+    text: '',
+    argv: [],
+    functions: [],
+    client: null
+  }
+}
 const wait_f = function()
 {
   state.wait = true;
@@ -209,6 +219,7 @@ export const addCommand = function(name: string, command: () => any)
 
 export const init = function()
 {
+  initState()
   addCommand('stuffcmds', stuffCmds_f);
   addCommand('exec', exec_f);
   addCommand('echo', echo_f);

@@ -20,17 +20,17 @@ import * as protocol from './protocol'
 import * as q from './q'
 import * as vec from './vec'
 
-export const cls = {
+export let cls = {
   state: 0,
   spawnparms: '',
   demonum: 0,
   message: {data: new ArrayBuffer(8192), cursize: 0}
 } as any
 
-export const clState = {
+export let clState = {
 } as any
 
-export const state = {
+export let state = {
   static_entities: [],
   visedicts: [],
   kbuttons: [],
@@ -1037,8 +1037,30 @@ export const sendCmd = async function()
   cls.message.cursize = 0;
 };
 
+
+const initState = () => {
+  state = {
+    static_entities: [],
+    visedicts: [],
+    kbuttons: [],
+    // parse
+    lastmsg: 0.0,
+    // tent
+    temp_entities: [],
+    sendmovebuf: {data: new ArrayBuffer(16), cursize: 0}
+  }
+  clState = {}
+  cls = {
+    state: 0,
+    spawnparms: '',
+    demonum: 0,
+    message: {data: new ArrayBuffer(8192), cursize: 0}
+  }
+}
+
 export const init = async function()
 {
+  initState()
   clearState();
   initInput();
   await initTEnts();

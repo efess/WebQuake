@@ -28,10 +28,10 @@ import * as ed from './ed'
 import * as q from './q'
 import * as vec from './vec'
 import * as sz from './sz'
-import IAssetStore from './interfaces/IAssetStore';
+import IAssetStore from './interfaces/store/IAssetStore';
 import INetworkDriver from './interfaces/net/INetworkDriver';
 
-export const state = {
+export let state = {
   time3: 0.0,
   timetotal: 0.0,
   timecount: 0,
@@ -45,8 +45,22 @@ export const state = {
 } as any
 
 export const cvr = {
-
 } as any
+
+const initState = () => {
+  state = {
+    time3: 0.0,
+    timetotal: 0.0,
+    timecount: 0,
+    inerror: false,
+    realtime: 0.0,
+    oldrealtime: 0.0,
+    initialized: false,
+    frametime: 0.0,
+    client: null,
+    framecount: 0
+  }
+}
 
 export const endGame = async function(message: string)
 {
@@ -1435,8 +1449,11 @@ export const init = async function(
   assetStore: IAssetStore,
   netDrivers: INetworkDriver[])
 {
+  initState()
   state.dedicated = dedicated
   state.oldrealtime = sys.floatTime();
+  sv.init();
+  cvar.init()
   cmd.init();
   v.init();
   chase.init();
@@ -1448,7 +1465,6 @@ export const init = async function(
   pr.init();
   mod.init();
   net.init(netDrivers);
-  sv.init();
   con.print(def.timedate);
   if (!dedicated) {
     await vid.init();

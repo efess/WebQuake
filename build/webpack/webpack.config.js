@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
+const { VueLoaderPlugin } = require('vue-loader')
 
 const resolveDir = dir => '../../' + dir
 
@@ -8,10 +9,11 @@ module.exports = {
   mode: process.env.NODE_ENV === 'production' ? "production" : "development",
   devtool: 'none',
   entry: {
-    app: ['webpack-hot-middleware/client', "./src/app/game/index.ts"]
+    app: ['webpack-hot-middleware/client', "./src/app/web/index.js"]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
       template: './src/app/index.html',
       title: 'Output Management'
@@ -28,9 +30,28 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader','sass-loader']
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      }, 
+      {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        loader: 'ts-loader',
         exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
+      },
+      {
+        test: /\.pug$/,
+        loader: 'pug-plain-loader'
       }
     ]
   }

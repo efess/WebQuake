@@ -28,11 +28,13 @@ interface IState {
 	newsocket: ISocket,
 	reps: number,
 	start_time: number,
-	hostport: number
+	hostport: number,
+	state: boolean
 }
 
-export const state: IState = {
+export let state: IState = {
 	listening: false,
+	drivers: [],
   message: {data: new ArrayBuffer(8192), cursize: 0},
 	activeconnections: 0,
 	time: 0,
@@ -42,7 +44,23 @@ export const state: IState = {
 	start_time: 0,
 	hostport: 26000,
 	state: false
-} as any
+}
+
+export const initState = () => {
+	state = {
+		listening: false,
+		drivers: [],
+		message: {data: new ArrayBuffer(8192), cursize: 0},
+		activeconnections: 0,
+		time: 0,
+		driverlevel: 0,
+		newsocket: null,
+		reps: 0,
+		start_time: 0,
+		hostport: 26000,
+		state: false
+	}
+}
 
 export const newQSocket = function()
 {

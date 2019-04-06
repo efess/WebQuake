@@ -61,8 +61,9 @@ export const init = async function()
   state.loading = await cachePic('loading');
   state.loadingElem = document.getElementById('loading');
   state.loadingElem.src = picToDataURL(state.loading);
+  state.gameContainer = document.querySelector('.game-container')
 
-  document.body.style.backgroundImage = 'url("' + picToDataURL(picFromWad('BACKTILE')) + '")';
+  state.gameContainer.style.backgroundImage = 'url("' + picToDataURL(picFromWad('BACKTILE')) + '")';
 
   GL.createProgram('Fill',
     ['uOrtho'],

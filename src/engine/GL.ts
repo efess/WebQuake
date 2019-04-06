@@ -522,6 +522,10 @@ export const streamDrawColoredQuad = function(x, y, w, h, r, g, b, a)
 state.glCalls = []
 export const init = function()
 {
+  state.textures = []
+  state.currenttextures =[]
+  state.programs = []
+  
   const debugUtil = (window as any).WebGLDebugUtils
   function throwOnGLError(err, funcName, args) {
     throw debugUtil.glEnumToString(err) + " was caused by call to: " + funcName;

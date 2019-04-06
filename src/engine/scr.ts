@@ -186,6 +186,9 @@ export const sizeDown_f = function()
 
 export const init = async function()
 {
+  state.con_current = 0
+  state.centertime_off = 0.0
+  state.centerstring = []
 	cvr.fov = cvar.registerVariable('fov', '90');
 	cvr.viewsize = cvar.registerVariable('viewsize', '100', true);
 	cvr.conspeed = cvar.registerVariable('scr_conspeed', '300');
@@ -377,7 +380,8 @@ export const updateScreen = function()
 	{
 		state.screenshot = false;
     gl.finish();
-    // OPEN is not defined, wtf?
+		// OPEN is not defined, wtf?
+		// oh it's browser API.
 		open(vid.state.mainwindow.toDataURL('image/jpeg'));
 	}
 };

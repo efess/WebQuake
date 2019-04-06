@@ -18,7 +18,6 @@ export const writeTextFile = (filename, data) =>
 
 export const loadFile = async function(filename: string)
 {
-	filename = filename.toLowerCase();
 	var src, i, j, k, search, pak, file, fd;
 	for (i = com.state.searchpaths.length - 1; i >= 0; --i)
 	{
@@ -35,13 +34,13 @@ export const loadFile = async function(filename: string)
 					return new ArrayBuffer(0);
 				try
 				{
-					fd = fs.openSync(search.filename + '/pak' + j + '.pak', 'r');
+					fd = fs.openSync(search.dir + '/pak' + j + '.pak', 'r');
 				}
 				catch (e)
 				{
 					break;
 				}
-				sys.print('PackFile: ' + search.filename + '/pak' + j + '.pak : ' + filename + '\n')
+				sys.print('PackFile: ' + search.dir + '/pak' + j + '.pak : ' + filename + '\n')
 				src = Buffer.alloc(file.filelen);
 				fs.readSync(fd, src, 0, file.filelen, file.filepos);
 				fs.closeSync(fd);
@@ -97,8 +96,13 @@ export const loadFile = async function(filename: string)
 	return dest;
 };
 
-export const loadPackFile = async function(packfile)
+export const loadStorePackFiles = async function(game) 
 {
+	return Promise.resolve([])
+}
+export const loadPackFile = async function(dir, packName)
+{
+	const packfile = dir + '/' + packName
 	var fd;
 	try
 	{

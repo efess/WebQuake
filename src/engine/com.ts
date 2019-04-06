@@ -2,9 +2,10 @@ import * as cmd from './cmd'
 import * as con from './console'
 import * as sys from './sys'
 import * as cvar from './cvar'
-import IAssetStore from './interfaces/IAssetStore'
+import IAssetStore from './interfaces/store/IAssetStore'
+import ISearch from './interfaces/store/ISearch'
 
-export const state = {
+export let state = {
   standard_quake: true,
   argv: [],
   searchpaths: [],
@@ -64,27 +65,43 @@ const path_f = function()
   for (i = state.searchpaths.length - 1; i >= 0; --i)
   {
     s = state.searchpaths[i];
-    for (j = s.pack.length - 1; j >= 0; --j)
-      con.print(s.filename + '/' + 'pak' + j + '.pak (' + s.pack[j].length + ' files)\n');
-    con.print(s.filename + '\n');
+    for (j = s.packs.length - 1; j >= 0; --j)
+      con.print(s.dir + '/' + 'pak' + j + '.pak (' + s.packs[j].length + ' files)\n');
+    con.print(s.dir + '\n');
   }
 };
 
 
 const addGameDirectory = async function(dir)
 {
-  var search = {filename: dir, pack: []};
+  var search:ISearch = {dir, type: 'rest', packs: []};
   var pak, i = 0;
   for (;;)
   {
-    pak = await state.assetStore.loadPackFile(dir + '/' + 'pak' + i + '.pak');
+    pak = await state.assetStore.loadPackFile(dir, 'pak' + i + '.pak');
     if (pak == null)
       break;
-    search.pack[search.pack.length] = pak;
+    search.packs[search.packs.length] = pak;
     ++i;
   }
   state.searchpaths[state.searchpaths.length] = search;
 };
+
+const addStorePacks = async (game: string) => {
+  var i;
+  const results = await state.assetStore.loadStorePackFiles(game)
+  if (!results) 
+    return
+  for(i = 0; i < results.length; i++) {
+    state.searchpaths[state.searchpaths.length] = {
+      dir: game,
+      data: results[i].data,
+      name: results[i].name,
+      type: 'indexeddb',
+      packs: results[i].contents
+    };
+  }
+}
 
 const initFilesystem = async function()
 {
@@ -95,9 +112,11 @@ const initFilesystem = async function()
     search = state.argv[i + 1];
   if (search != null)
     await addGameDirectory(search);
-  else
+  else 
     await addGameDirectory('id1');
-    
+  
+  await addStorePacks('id1')
+
   if (state.rogue === true)
     await addGameDirectory('rogue');
   else if (state.hipnotic === true)
@@ -111,6 +130,7 @@ const initFilesystem = async function()
     {
       state.modified = true;
       addGameDirectory(search);
+      addStorePacks(search)
     }
   }
 
@@ -253,6 +273,11 @@ export const parse = function(data)
  
 export const init = async function(assetStore: IAssetStore)
 {
+  state.standard_quake = true
+  state.searchpaths = []
+  state.token = ''
+  state.argv = []
+  state.modified = false
   state.assetStore = assetStore
   var swaptest = new ArrayBuffer(2);
   var swaptestview = new Uint8Array(swaptest);

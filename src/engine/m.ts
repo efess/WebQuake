@@ -292,7 +292,7 @@ export const singlePlayer_Key = async function(k)
 
 export const scanSaves = async function()
 {
-  var searchpaths = com.state.searchpaths, i, j, search = 'Quake.' + com.state.gamedir[0].filename + '/s', f, version, name, j, c;
+  var searchpaths = com.state.searchpaths, i, j, search = 'Quake.' + com.state.gamedir[0].dir + '/s', f, version, name, j, c;
   com.state.searchpaths = com.state.gamedir;
   for (i = 0; i < state.max_savegames; ++i)
   {
