@@ -18,4 +18,4 @@ EXPOSE 26000
 # Define environment variable
 # ENV NAME World
 
-CMD ["npm", "run", "start:gameserver"]
+ENTRYPOINT ["node", "./dist/server/index.js"]

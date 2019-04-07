@@ -22,9 +22,9 @@ export const loadFile = async function(filename: string)
 	for (i = com.state.searchpaths.length - 1; i >= 0; --i)
 	{
 		search = com.state.searchpaths[i];
-		for (j = search.pack.length - 1; j >= 0; --j)
+		for (j = search.packs.length - 1; j >= 0; --j)
 		{
-			pak = search.pack[j];
+			pak = search.packs[j];
 			for (k = 0; k < pak.length; ++k)
 			{
 				file = pak[k];
