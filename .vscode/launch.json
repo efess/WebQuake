@@ -17,7 +17,8 @@
           "cwd": "${workspaceFolder}",
           "protocol": "inspector",
           "args": [
-            "-game", "dm"
+            "-game", "dm",
+            "-port", "26001"
           ],
           "outFiles": [
             "${workspaceFolder}/dist/**/*.js"

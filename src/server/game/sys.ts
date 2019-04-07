@@ -68,6 +68,7 @@ const startGameLoop = () => {
 }
 
 export const init = async () => {
+	q.state.isNaN = (val) => Number.isNaN(val)
 	com.initArgv(process.argv.slice(1));
 	oldTime = process.hrtime();
   print('Host.Init\n');
@@ -77,5 +78,4 @@ export const init = async () => {
 	process.stdin.resume();
 	process.stdin.on('data', onConsoleInput);
 	process.nextTick(startGameLoop);
-	q.state.isNaN = (val) => Number.isNaN(val)
 }
