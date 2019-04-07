@@ -51,8 +51,8 @@ export const loadFile = async function(filename: string)
 			break;
 		try
 		{
-			src = fs.readFileSync(search.filename + '/' + filename);
-			sys.print('FindFile: ' + search.filename + '/' + filename + '\n');
+			src = fs.readFileSync(search.dir + '/' + filename);
+			sys.print('FindFile: ' + search.dir + '/' + filename + '\n');
 			break;
 		}
 		catch (e)

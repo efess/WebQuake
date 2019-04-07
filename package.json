@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./dist && node ./build && tsc",
+    "build:justserver": "rimraf ./dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "node ./build/devserver",
     "start:gameserver": "node ./dist/server/game",

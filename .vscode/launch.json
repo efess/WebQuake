@@ -12,10 +12,13 @@
           "type": "node",
           "request": "launch",
           "name": "Debug Dedicated",
-          "preLaunchTask": "npm: build",
+          "preLaunchTask": "npm: build:justserver",
           "program": "${workspaceFolder}/src/server/game/index.ts",
           "cwd": "${workspaceFolder}",
           "protocol": "inspector",
+          "args": [
+            "-game", "dm"
+          ],
           "outFiles": [
             "${workspaceFolder}/dist/**/*.js"
           ],

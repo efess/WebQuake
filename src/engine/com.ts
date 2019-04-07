@@ -276,7 +276,6 @@ export const init = async function(assetStore: IAssetStore)
   state.standard_quake = true
   state.searchpaths = []
   state.token = ''
-  state.argv = []
   state.modified = false
   state.assetStore = assetStore
   var swaptest = new ArrayBuffer(2);
