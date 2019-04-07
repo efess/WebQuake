@@ -28,5 +28,10 @@ push_job:
   script:
     - docker build -t $CONTAINER_FRONTEND_REF_IMAGE -f Dockerfile.frontend .
     - docker push $CONTAINER_FRONTEND_REF_IMAGE
+    - docker tag $CONTAINER_FRONTEND_REF_IMAGE $CONTAINER_FRONTEND_RELEASE_IMAGE
+    - docker push $CONTAINER_FRONTEND_RELEASE_IMAGE
+
     - docker build -t $CONTAINER_SERVER_REF_IMAGE -f Dockerfile.server .
     - docker push $CONTAINER_SERVER_REF_IMAGE
+    - docker tag $CONTAINER_SERVER_REF_IMAGE $CONTAINER_SERVER_RELEASE_IMAGE
+    - docker push $CONTAINER_SERVER_RELEASE_IMAGE
