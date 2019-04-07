@@ -10,7 +10,7 @@ COPY package.json /usr/app/
 RUN npm install --only=production
 
 # Copy all applicable directories
-COPY ./dist /usr/app/dist
+COPY ./dist /usr/app
 
 # Make game port available to the world outside this container
 EXPOSE 26000
