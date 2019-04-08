@@ -6,6 +6,7 @@ import * as r from './r'
 import * as GL from './GL'
 import * as q from './q'
 import * as vec from './vec'
+import * as host from './host'
 
 export const EFFECTS = {
   brightfield: 1,
@@ -764,15 +765,19 @@ export const loadBrushModel = function(buffer)
   var version = (new DataView(buffer)).getUint32(0, true);
   if (version !== VERSION.brush)
     sys.error('Mod.LoadBrushModel: ' + loadmodel.name + ' has wrong version number (' + version + ' should be ' + VERSION.brush + ')');
-  loadVertexes(buffer);
-  loadEdges(buffer);
-  loadSurfedges(buffer);
-  loadTextures(buffer);
-  loadLighting(buffer);
+  if (!host.state.dedicated) {
+    loadVertexes(buffer);
+    loadEdges(buffer);
+    loadSurfedges(buffer);
+    loadTextures(buffer);
+    loadLighting(buffer);
+  }
   loadPlanes(buffer);
-  loadTexinfo(buffer);
-  loadFaces(buffer);
-  loadMarksurfaces(buffer);
+  if (!host.state.dedicated) {
+    loadTexinfo(buffer);
+    loadFaces(buffer);
+    loadMarksurfaces(buffer);
+  }
   loadVisibility(buffer);
   loadLeafs(buffer);
   loadNodes(buffer);
@@ -781,30 +786,32 @@ export const loadBrushModel = function(buffer)
   loadEntities(buffer);
   loadSubmodels(buffer);
 
-  var i, vert, mins = [0.0, 0.0, 0.0], maxs = [0.0, 0.0, 0.0];
-  for (i = 0; i < loadmodel.vertexes.length; ++i)
-  {
-    vert = loadmodel.vertexes[i];
-    if (vert[0] < mins[0])
-      mins[0] = vert[0];
-    else if (vert[0] > maxs[0])
-      maxs[0] = vert[0];
+  if (!host.state.dedicated) {
+    var i, vert, mins = [0.0, 0.0, 0.0], maxs = [0.0, 0.0, 0.0];
+    for (i = 0; i < loadmodel.vertexes.length; ++i)
+    {
+      vert = loadmodel.vertexes[i];
+      if (vert[0] < mins[0])
+        mins[0] = vert[0];
+      else if (vert[0] > maxs[0])
+        maxs[0] = vert[0];
 
-    if (vert[1] < mins[1])
-      mins[1] = vert[1];
-    else if (vert[1] > maxs[1])
-      maxs[1] = vert[1];
+      if (vert[1] < mins[1])
+        mins[1] = vert[1];
+      else if (vert[1] > maxs[1])
+        maxs[1] = vert[1];
 
-    if (vert[2] < mins[2])
-      mins[2] = vert[2];
-    else if (vert[2] > maxs[2])
-      maxs[2] = vert[2];
-  };
-  loadmodel.radius = vec.length([
-    Math.abs(mins[0]) > Math.abs(maxs[0]) ? Math.abs(mins[0]) : Math.abs(maxs[0]),
-    Math.abs(mins[1]) > Math.abs(maxs[1]) ? Math.abs(mins[1]) : Math.abs(maxs[1]),
-    Math.abs(mins[2]) > Math.abs(maxs[2]) ? Math.abs(mins[2]) : Math.abs(maxs[2])
-  ]);
+      if (vert[2] < mins[2])
+        mins[2] = vert[2];
+      else if (vert[2] > maxs[2])
+        maxs[2] = vert[2];
+    };
+    loadmodel.radius = vec.length([
+      Math.abs(mins[0]) > Math.abs(maxs[0]) ? Math.abs(mins[0]) : Math.abs(maxs[0]),
+      Math.abs(mins[1]) > Math.abs(maxs[1]) ? Math.abs(mins[1]) : Math.abs(maxs[1]),
+      Math.abs(mins[2]) > Math.abs(maxs[2]) ? Math.abs(mins[2]) : Math.abs(maxs[2])
+    ]);
+  }
 };
 
 /*
