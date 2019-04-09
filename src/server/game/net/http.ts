@@ -48,6 +48,7 @@ const getActivePlayers = () => {
       connectedTime: seconds,
     })
   }
+  return players
 }
 const createQueryResponse = () => {
   return {
@@ -167,8 +168,8 @@ export const registerWithMaster = () => {
 	const serverPost = JSON.stringify({
 		game: gameVar && gameVar.value || 'id1',
 		gameType: 'what is this field for?',
-		name: net.cvr.hostname.value,
-		hostdomain: net.cvr.hostname.string,
+		name: net.cvr.hostname.string,
+		hostdomain: net.cvr.hostdomain.string,
 		port: net.state.hostport,
 		location: host.cvr.location.string,
 		description: host.cvr.description.string
@@ -177,16 +178,18 @@ export const registerWithMaster = () => {
 		...url.parse(masterServer + '/api/server'),
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
-			'Content-Length': Buffer.byteLength(serverPost)
+			'Content-Type': 'application/json; charset=utf-8'
 		}
 	}
 	const postReq = http.request(options, resp => {
 		resp.on('data', () => {
-			con.print('Updated master server');
+      con.print('Updated master server\n');
 		});
+    resp.on('end', () => {
+			con.print('No more data in response.\n');
+    });
 	}).on("error", (err) => {
-		con.print('Error updated master server: ' + err.message);
+		con.print('Error updated master server: ' + err.message + '\n');
 	});
 
   // post the data
