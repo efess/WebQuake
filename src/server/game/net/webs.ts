@@ -68,6 +68,10 @@ export const listen = function()
 	}
 };
 
+export const registerWithMaster = () => {
+	return httpServer.registerWithMaster()
+}
+
 export const checkNewConnections = (): ISocket => {
 	if (state.acceptsockets.length === 0)
 		return;

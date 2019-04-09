@@ -1,7 +1,7 @@
 import * as http from 'http'
 import * as host from '../../../engine/host'
 import * as pr from '../../../engine/pr'
-import * as com from '../../../engine/com'
+import * as con from '../../../engine/console'
 import * as net from '../../../engine/net'
 import * as sv from '../../../engine/sv'
 import * as sys from '../sys'
@@ -83,7 +83,7 @@ const onRequest = (request, response) => {
 		response.statusCode = 501;
 		response.end();
 		return;
-  } else if (pathParams[1] === 'query') {
+  } else if (pathParams[1] === 'status') {
     if(request.method === 'GET' || request.method === 'HEAD') {
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json; charset=UTF-8');
@@ -156,4 +156,40 @@ export const createHttpServer = (port) => {
   server.on('request', onRequest);
 
   return server
+}
+
+export const registerWithMaster = () => {
+	const gameVar = cvar.findVar('game')
+	const masterServer = host.cvr.masterserver.string
+	if (!masterServer) {
+		return
+	}
+	const serverPost = JSON.stringify({
+		game: gameVar && gameVar.value || 'id1',
+		gameType: 'what is this field for?',
+		name: net.cvr.hostname.value,
+		hostdomain: net.cvr.hostname.string,
+		port: net.state.hostport,
+		location: host.cvr.location.string,
+		description: host.cvr.description.string
+	})
+	const options = {
+		...url.parse(masterServer + '/api/server'),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Content-Length': Buffer.byteLength(serverPost)
+		}
+	}
+	const postReq = http.request(options, resp => {
+		resp.on('data', () => {
+			con.print('Updated master server');
+		});
+	}).on("error", (err) => {
+		con.print('Error updated master server: ' + err.message);
+	});
+
+  // post the data
+  postReq.write(serverPost);
+	postReq.end();
 }

@@ -131,6 +131,7 @@ const initFilesystem = async function()
       state.modified = true;
       addGameDirectory(search);
       addStorePacks(search)
+      cvar.set('game', search)
     }
   }
 
@@ -289,6 +290,7 @@ export const init = async function(assetStore: IAssetStore)
 
   cvr.registered = cvar.registerVariable('registered', '0');
   cvar.registerVariable('cmdline', state.cmdline, false, true);
+  cvar.registerVariable('game', 'id1', false, true);
   cmd.addCommand('path', path_f);
   await initFilesystem();
   await checkRegistered();

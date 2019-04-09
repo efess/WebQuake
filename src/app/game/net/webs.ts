@@ -115,6 +115,10 @@ export const onError = function()
 	net.close(this.data_socket);
 };
 
+export const registerWithMaster = () => {
+	// Cannot connect to browser server, no peer to peer.
+}
+
 export const onMessage = function(message)
 {
 	var data = message.data;

@@ -10,7 +10,6 @@ import * as q from './q'
 import ISocket from './interfaces/net/ISocket'
 import IDatagram from './interfaces/net/IDatagram'
 import INetworkDriver from './interfaces/net/INetworkDriver'
-import { listen } from '../server/game/net/webs';
 
 export const activeSockets: ISocket[] = [];
 
@@ -382,6 +381,7 @@ export const init = (drivers: INetworkDriver[]) => {
 
 	cvr.messagetimeout = cvar.registerVariable('net_messagetimeout', '300');
 	cvr.hostname = cvar.registerVariable('hostname', 'UNNAMED');
+	cvr.hostdomain = cvar.registerVariable('hostdomain', '');
 	cmd.addCommand('listen', listen_f);
 	cmd.addCommand('maxplayers', maxPlayers_f);
 	cmd.addCommand('port', port_f);
@@ -416,3 +416,10 @@ export const shutdown = function()
 	for (var i = 0; i < activeSockets.length; ++i)
 		close(activeSockets[i]);
 };
+
+export const registerWithMaster = () => {
+	const webSocket = state.drivers.find(drv => drv.name === 'websocket')
+	if (webSocket) {
+		webSocket.registerWithMaster()
+	}
+}

@@ -21,6 +21,9 @@ export const listen = () => {
 
 }
 
+export const registerWithMaster = () => {
+}
+
 export const connect = function(host: string)
 {
 	if (host !== 'local')

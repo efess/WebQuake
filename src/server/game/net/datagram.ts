@@ -34,6 +34,9 @@ export const checkForResend = (): number => {
   return 0
 }
 
+export const registerWithMaster = () => {
+}
+
 export const init = function()
 {
 	if (com.checkParm('-noudp') != null)

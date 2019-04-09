@@ -14,5 +14,6 @@ export default interface INetworkDriver {
   sendMessage: (sock: ISocket, data: IDatagram) => number,
   sendUnreliableMessage: (sock: ISocket, data: IDatagram) => number,
   getMessage: (sock: ISocket) => any,
-  listen: () => void
+  listen: () => void,
+  registerWithMaster: () => void
 } 

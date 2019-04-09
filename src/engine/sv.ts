@@ -2476,6 +2476,7 @@ export const spawnServer = async function(server)
 		host.state.client.edict.v_int[pr.entvars.netname] = pr.state.netnames + (i << 5);
 		sendServerinfo(host.state.client);
 	}
+	net.registerWithMaster()
 	con.dPrint('Server spawned.\n');
 };
 

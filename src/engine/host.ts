@@ -1441,6 +1441,11 @@ const initLocal = () => {
   cvr.pausable = cvar.registerVariable('pausable', '1');
   cvr.temp1 = cvar.registerVariable('temp1', '0');
   cvr.rcon_password = cvar.registerVariable('rcon_password', 'abcd');
+ 
+  // server details for discovery
+  cvr.location = cvar.registerVariable('location', '');
+  cvr.description = cvar.registerVariable('description', '');
+  cvr.masterserver = cvar.registerVariable('masterserver', 'http://master.netquake.io');
   findMaxClients();
 }
 
