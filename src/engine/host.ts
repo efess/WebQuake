@@ -1454,7 +1454,9 @@ export const init = async function(
   assetStore: IAssetStore,
   netDrivers: INetworkDriver[])
 {
+
   initState()
+  state.serverId = com.uuidv4()
   state.dedicated = dedicated
   state.oldrealtime = sys.floatTime();
   sv.init();

@@ -166,6 +166,7 @@ export const registerWithMaster = () => {
 		return
 	}
 	const serverPost = JSON.stringify({
+    serverId: host.state.serverId,
 		game: gameVar && gameVar.value || 'id1',
 		gameType: 'what is this field for?',
 		name: net.cvr.hostname.string,
