@@ -283,7 +283,12 @@ const _frame = async function()
         + Math.floor(pass3) + ' snd\n');
     }
   
-    if (state.startdemos === true)
+    if (state.connectOnLoad) {
+
+      const url = state.connectOnLoad
+      state.connectOnLoad = null
+      await cl.establishConnection(url);
+    } else if (state.startdemos === true)
     {
       cl.nextDemo();
       state.startdemos = false;
@@ -1449,6 +1454,10 @@ const initLocal = () => {
   findMaxClients();
 }
 
+const getConnectUrl = () => {
+  const i = com.checkParm('-connect')
+  return i ? com.state.argv[i + 1] : ''
+}
 export const init = async function(
   dedicated: boolean,
   assetStore: IAssetStore,
@@ -1459,6 +1468,7 @@ export const init = async function(
   state.serverId = com.uuidv4()
   state.dedicated = dedicated
   state.oldrealtime = sys.floatTime();
+  state.connectOnLoad = getConnectUrl()
   sv.init();
   cvar.init()
   cmd.init();

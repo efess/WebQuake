@@ -84,7 +84,24 @@ const onRequest = (request, response) => {
 		response.statusCode = 501;
 		response.end();
 		return;
-  } else if (pathParams[1] === 'status') {
+  } else if (pathParams[1] === 'ping') {
+    if(request.method === 'GET' || request.method === 'HEAD') {
+      response.statusCode = 200;
+			response.setHeader('Access-Control-Allow-Origin', '*');
+			response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+			response.setHeader('Access-Control-Allow-Headers', 'Authorization');
+      response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+      if (request.method !== 'HEAD') {
+        response.write(JSON.stringify({message: 'pong'}))
+      }
+      response.end();
+      return
+    } else {
+      response.statusCode = 405;
+			response.write("Method not allowed")
+      response.end();
+		}
+	} else if (pathParams[1] === 'status') {
     if(request.method === 'GET' || request.method === 'HEAD') {
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json; charset=UTF-8');
@@ -93,7 +110,11 @@ const onRequest = (request, response) => {
       }
       response.end();
       return
-    }
+    } else {
+      response.statusCode = 405;
+			response.write("Method not allowed")
+      response.end();
+		}
   } else if (pathParams[1] === 'rcon') {
 		var data;
 		try
@@ -187,7 +208,6 @@ export const registerWithMaster = () => {
       con.print('Updated master server\n');
 		});
     resp.on('end', () => {
-			con.print('No more data in response.\n');
     });
 	}).on("error", (err) => {
 		con.print('Error updated master server: ' + err.message + '\n');

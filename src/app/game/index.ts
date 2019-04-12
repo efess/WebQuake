@@ -2,7 +2,7 @@ import {init} from '../../engine/sys'
 import * as AppSys from './sys'
 
 
-export default (hooks) => {
+export default (args, hooks) => {
   AppSys.registerHooks(hooks)
-  return init(AppSys)
+  return init(args, AppSys)
 }

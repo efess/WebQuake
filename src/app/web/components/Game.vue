@@ -14,8 +14,24 @@ const gameHooks = (vueComp) => ({
 })
 
 export default Vue.extend({
+  props: {
+    server: {
+      type: Object,
+      default: null
+    }
+  },
   mounted() {
-    return GameInit(gameHooks(this))
+    return GameInit(this.args, gameHooks(this))
+  },
+  computed: {
+    args () {
+      const server = this.server
+      const _args = []
+      if (this.server) {
+        _args.push(`-connect ws://${server.dns}:${server.port}`)
+      }
+      return _args.join(' ')
+    }
   }
 })
 </script>

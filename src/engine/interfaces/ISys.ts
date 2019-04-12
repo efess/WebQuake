@@ -1,4 +1,3 @@
-import { init } from "../sys";
 import IAssetStore from "./store/IAssetStore";
 
 export interface ISys {
@@ -7,6 +6,6 @@ export interface ISys {
   floatTime: () => number,
   error: (text: string) => void,
   getExternalCommand: () => string,
-  init: () => void,
+  init: (argv: string) => void,
   assetStore: IAssetStore
 }

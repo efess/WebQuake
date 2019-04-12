@@ -117,8 +117,7 @@ const onwheel = async function(e)
 	e.preventDefault();
 };
 
-
-export const init = async () =>
+export const init = async (argv: string) =>
 {
 	if ((document.location.protocol !== 'http:') && (document.location.protocol !== 'https:'))
 		error('Protocol is ' + document.location.protocol + ', not http: or https:');
@@ -129,38 +128,39 @@ export const init = async () =>
 
 	var i;
 
-	var cmdline = decodeURIComponent(document.location.search);
-	var location = document.location;
-	var argv = [location.href.substring(0, location.href.length - location.search.length)];
-	if (cmdline.charCodeAt(0) === 63)
+	const args = [location.href.substring(0, location.href.length - location.search.length)]
+	// var cmdline = decodeURIComponent(document.location.search);
+	
+	// var location = document.location;
+	// var argv = [location.href.substring(0, location.href.length - location.search.length)];
+
+	var text = '';
+	var quotes = false;
+	var c;
+	for (i = 0; i < argv.length; ++i)
 	{
-		var text = '';
-		var quotes = false;
-		var c;
-		for (i = 1; i < cmdline.length; ++i)
+		c = argv.charCodeAt(i);
+		if ((c < 32) || (c > 127))
+			continue;
+		if (c === 34)
 		{
-			c = cmdline.charCodeAt(i);
-			if ((c < 32) || (c > 127))
-				continue;
-			if (c === 34)
-			{
-				quotes = !quotes;
-				continue;
-			}
-			if ((quotes === false) && (c === 32))
-			{
-				if (text.length === 0)
-					continue;
-				argv[argv.length] = text;
-				text = '';
-				continue;
-			}
-			text += cmdline.charAt(i);
+			quotes = !quotes;
+			continue;
 		}
-		if (text.length !== 0)
-			argv[argv.length] = text;
+		if ((quotes === false) && (c === 32))
+		{
+			if (text.length === 0)
+				continue;
+			args.push(text);
+			text = '';
+			continue;
+		}
+		text += argv.charAt(i);
 	}
-	com.initArgv(argv);
+	if (text.length !== 0)
+		args.push(text);
+	
+	com.initArgv(args);
 
 	var elem = document.documentElement;
 	vid.state.width = (elem.clientWidth <= 320) ? 320 : elem.clientWidth;
@@ -216,7 +216,7 @@ export const init = async () =>
 		window[eventNames[i]] = events[eventNames[i]];
 
 	const gameLoop = async () => {
-		var timeIn = Date.now();
+		var timeIn = new Date().getTime()
 		try{
 			await host.frame();
 		} 
@@ -230,7 +230,8 @@ export const init = async () =>
 		if(!state.looping)
 			return;
 			
-		var putzAroundTime = Math.max((1000.0 / state.maxFps) - (Date.now() - timeIn), 0);
+		var timeOut = new Date().getTime()
+		var putzAroundTime = Math.max((1000.0 / (state.maxFps || 60)) - (timeOut - timeIn), 1);
 		
 		return setTimeout(gameLoop, putzAroundTime);
 	}
