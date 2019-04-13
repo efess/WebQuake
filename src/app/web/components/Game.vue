@@ -20,8 +20,20 @@ export default Vue.extend({
       default: null
     }
   },
+  data() {
+    return {
+      gameSys: null,
+      gameQuit: false
+    }
+  },
   mounted() {
-    return GameInit(this.args, gameHooks(this))
+    this.gameSys = GameInit(this.args, {
+      // hooks
+      quit: () => {
+        this.gameQuit = true
+        this.$router.go(-1)
+      }
+    })
   },
   computed: {
     args () {
@@ -29,8 +41,20 @@ export default Vue.extend({
       const _args = []
       if (this.server) {
         _args.push(`-connect ws://${server.dns}:${server.port}`)
-      }
+      } 
       return _args.join(' ')
+    }
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.gameQuit) {
+      return next()
+    }
+    const answer = window.confirm('Do you really want to leave?')
+    if (answer) {
+      this.gameSys.quit()
+      next()
+    } else {
+      next(false)
     }
   }
 })

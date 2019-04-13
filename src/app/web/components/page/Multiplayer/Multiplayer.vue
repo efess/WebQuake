@@ -1,8 +1,6 @@
 <template lang="pug">
   .multiplayer
-    .buttons
-      button.btn(@click="refresh") Refresh
-    table.table(:class="loading ? 'loading': ''")
+    table.table
       thead
         th Name
         th Connection
@@ -23,49 +21,30 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from 'vuex'
-
-const refreshRate = 5000
+import {mapGetters, mapMutations} from 'vuex'
 
 export default {
   data () {
     return {
-      loading: true,
-      autoRefreshId: null
     }
   },
   computed: {
     ...mapGetters('multiplayer', ['getServerStatuses'])
   },
-  mounted() {
-    this.refresh()
-      .then(this.autoRefresh)
-  },
-  destroy() {
-    debugger
-    clearTimeout(this.autoRefreshId)
-  },
   methods: {
-    ...mapActions('multiplayer', ['loadServerStatuses', 'pingAllServers']),
-    autoRefresh () {
-      this.autoRefreshId = setTimeout(() => {
-        this.refresh()
-          .then(this.autoRefresh)
-      }, refreshRate)
-    },
-    refresh() {
-      this.loading = true;
-      return this.loadServerStatuses()
-        .then(() => {
-          this.loading = false
-        }, () => {
-          this.loading = false
-        })
-        .then(this.pingAllServers)
-    },
+    ...mapMutations('multiplayer', ['setAutoRefreshOff', 'setAutoRefreshOn']),
     join(server) {
-      this.$emit('joinMultiplayer', server)
+      this.$router.push({name: 'quake', params: {server}})
     }
+  },
+  beforeRouteEnter (to, from, next) {
+    return next(vm => {
+      vm.setAutoRefreshOn()
+    })
+  },
+  beforeRouteLeave (to, from, next) {
+    this.setAutoRefreshOff()
+    return next()
   }
 }
 </script>

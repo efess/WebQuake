@@ -3,7 +3,7 @@ const masterServerUrl = 'http://localhost:3000/api/server'
 
 const state = {
   serverStatuses: [],
-  autoRefresh: true
+  autoRefresh: false
 }
 
 const mutationTypes = {
@@ -43,6 +43,8 @@ const pingServer = (host, port) => {
     })
 }
 
+let setTimeoutId = 0
+
 const actions = {
   loadServerStatuses ({commit}) {
     return axios.get(masterServerUrl)
@@ -74,10 +76,12 @@ const actions = {
       .then(() => dispatch('pingAllServers'))
   },
   refreshLoop ({dispatch}) {
-    setTimeout(() => {
-      return dispatch('refresh')
-        .then(() => dispatch('refreshLoop'))
-    }, refreshTime)
+    return dispatch('refresh')
+      .then(() => {
+        setTimeout(() => {
+          dispatch('refreshLoop')
+        }, refreshTime)
+      })
   }
 }
 

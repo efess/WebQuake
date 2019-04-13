@@ -14,6 +14,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "connect-history-api-fallback": "^1.6.0",
+    "middleware": "^1.0.0",
     "websocket": "^1.0.28"
   },
   "devDependencies": {

@@ -16,5 +16,6 @@ const store = new Vuex.Store({
 
 store.dispatch('game/loadConfig');
 store.dispatch('game/loadAssets');
+store.dispatch('multiplayer/refreshLoop');
 
 export default store

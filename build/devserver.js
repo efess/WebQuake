@@ -4,20 +4,20 @@ var express = require('express')
 //var server = require('../src/server').default
 var webpack = require('webpack')
 var webpackConfig = require('./webpack/webpack.config')
+var connectHistory = require('connect-history-api-fallback')
 
 var app = express()
 
-
 var port = process.env.PORT || 8080
 var compiler = webpack(webpackConfig)
-
+app.us
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
   quiet: true
 })
 
 app.use('/id1', express.static(path.join(__dirname, '../id1')))
-
+app.use(connectHistory())
 compiler.hooks.afterEmit.tap('compilation', compilation => {
   console.log(compilation)
   hotMiddleware.publish({ action: 'reload' })
