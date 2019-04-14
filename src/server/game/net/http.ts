@@ -195,20 +195,33 @@ export const registerWithMaster = () => {
 		port: net.state.hostport,
 		location: host.cvr.location.string,
 		description: host.cvr.description.string
-	})
+  })
+  
 	const options = {
 		...url.parse(masterServer + '/api/server'),
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
 		}
-	}
+  }
+  
 	const postReq = http.request(options, resp => {
-		resp.on('data', () => {
-      con.print('Updated master server\n');
+		resp.on('data', (data) => {
+      const statusCode = resp.statusCode
+      const text = data.toString('ascii')
+      if (statusCode === 200) {
+        const resp = JSON.parse(text)
+        con.print('Master server: ' + resp.message + '\n')
+      } else {
+        if (statusCode === 404) {
+          con.print('Master server not found\n');
+        } else if (Math.floor(statusCode /100) === 4) {
+          con.print('Data error connecting to Master Server\n');
+        } else if (Math.floor(statusCode /100) === 5) {
+          con.print('Error with master server\n');
+        }
+      }
 		});
-    resp.on('end', () => {
-    });
 	}).on("error", (err) => {
 		con.print('Error updated master server: ' + err.message + '\n');
 	});
