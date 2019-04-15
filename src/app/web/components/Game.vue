@@ -40,7 +40,7 @@ export default Vue.extend({
       const server = this.server
       const _args = []
       if (this.server) {
-        _args.push(`-connect ws://${server.dns}:${server.port}`)
+        _args.push(`-connect ws://${server.connecthostport}`)
       } 
       return _args.join(' ')
     }

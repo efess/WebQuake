@@ -56,12 +56,12 @@ export const pause = function()
     state.cd.pause();
 };
 
-export const resume = function()
+export const resume = async function()
 {
   if ((state.initialized !== true) || (state.enabled !== true))
     return;
   if (state.cd != null)
-    state.cd.play();
+    await state.cd.play()
 };
 
 export const cd_f = async function()

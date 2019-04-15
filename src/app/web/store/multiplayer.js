@@ -53,7 +53,7 @@ const actions = {
           // Transforms array into key/value hash with key being host:port
           return {
             ...agg,
-            [server.dns + ':' + server.port]: {
+            [server.connecthostport]: {
               ping: '..',
               ...server
             }

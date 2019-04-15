@@ -1544,7 +1544,7 @@ export const parseServerMessage = async function()
       if (clState.paused === true)
         cdAudio.pause();
       else
-        cdAudio.resume();
+        await cdAudio.resume();
       continue;
     case protocol.SVC.signonnum:
       i = msg.readByte();
