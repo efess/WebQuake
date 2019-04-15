@@ -7,6 +7,13 @@ const resolveDir = dir => '../../' + dir
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? "production" : "development",
+  plugins: [
+    new VueLoaderPlugin(),
+    new HtmlWebpackPlugin({
+      template: './src/app/index.html',
+      title: 'Output Management'
+    })
+  ],
   output: {
     path: path.join(__dirname, resolveDir("dist/app")),
     filename: "[name].bundle.js",

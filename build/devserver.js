@@ -3,7 +3,7 @@ const path = require('path')
 var express = require('express')
 //var server = require('../src/server').default
 var webpack = require('webpack')
-var webpackConfig = require('./webpack/webpack.config.test')
+var webpackConfig = require('./webpack/webpack.config.dev')
 var connectHistory = require('connect-history-api-fallback')
 
 var app = express()

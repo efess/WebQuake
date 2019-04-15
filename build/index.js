@@ -1,15 +1,9 @@
 require('dotenv').config()
 const webpack = require('webpack')
 const webpackProd = require('./webpack/webpack.config.prod')
-const webpackTest = require('./webpack/webpack.config.test')
 const chalk = require('chalk')
 
-console.log(process.env.NODE_ENV)
-const webpackConf = process.env.NODE_ENV === 'production'
-  ? webpackProd
-  : webpackTest
-
-webpack(webpackConf, (err, stats) => {
+webpack(webpackProd, (err, stats) => {
   if (err) {
     throw err
   }
