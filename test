@@ -1,0 +1,4 @@
+docker kill test
+docker rm test
+docker build -t testit -f Dockerfile.frontend .
+docker run -d --name test -p 8081:80 testit
