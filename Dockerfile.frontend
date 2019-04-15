@@ -11,4 +11,4 @@ EXPOSE 80
 # Define environment variable
 # ENV NAME World
 
-CMD ["npm", "start"]
+CMD ["nginx -g 'daemon off;'"]
