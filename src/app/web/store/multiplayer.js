@@ -1,5 +1,5 @@
 import axios from 'axios'
-const masterServerUrl = 'http://localhost:3000/api/server'
+const masterServerUrl = 'http://master.netquake.io/api/server'
 
 const state = {
   serverStatuses: [],
