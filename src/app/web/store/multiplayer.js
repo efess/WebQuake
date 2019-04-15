@@ -33,8 +33,8 @@ const mutations = {
 }
 
 const refreshTime = 5000
-const pingServer = (host, port) => {
-  const url = `http://${host}:${port}/ping`
+const pingServer = (hostport) => {
+  const url = `http://${hostport}/ping`
   const start = new Date().getTime()
   return axios.get(url, {timeout: 1000})
     .then(() => {
@@ -66,7 +66,7 @@ const actions = {
 
     return Object.keys(servers).map(key => {
       const server = servers[key]
-      return pingServer(server.dns, server.port)
+      return pingServer(server.connecthostport)
         .then(time => commit('setServerPing', {serverKey: key, ping: time}))
         .catch(err => commit('setServerPing', {serverKey: key, ping: '??'}))
     })
