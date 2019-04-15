@@ -11,7 +11,7 @@
       tbody
         tr(v-for="(server, key) in getServerStatuses")
           td {{server.name}}
-          td {{server.dns}}:{{server.port}}
+          td {{server.connecthostport}}
           td {{server.location}}
           td {{server.game}}
           td {{server.ping}}
