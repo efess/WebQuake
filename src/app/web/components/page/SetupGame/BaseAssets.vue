@@ -41,10 +41,10 @@ export default {
   },
   computed: {
     packOne() {
-      return this.assetMetas.find(assetMeta => assetMeta.fileName === 'pak1.pak')
+      return this.assetMetas.find(assetMeta => assetMeta.fileName.toLowerCase() === 'pak1.pak')
     },
     packZero() { 
-      return this.assetMetas.find(assetMeta => assetMeta.fileName === 'pak0.pak')
+      return this.assetMetas.find(assetMeta => assetMeta.fileName.toLowerCase() === 'pak0.pak')
     }
   }
 }

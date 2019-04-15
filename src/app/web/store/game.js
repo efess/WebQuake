@@ -33,7 +33,6 @@ const actions = {
     commit(mutationTypes.setConfigFile, configFile)
   },
   saveConfig ({commit}, configFile) {
-    debugger
     localStorage[configFileName] = configFile
     commit(mutationTypes.setConfigFile, configFile)
   },
