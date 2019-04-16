@@ -305,7 +305,11 @@ export const error = function(text)
 			console.log(con.state.text[i].text);
 	}
 	alert(text);
-	throw new Error(text);
+	if (state.hooks && state.hooks.quit) {
+		state.hooks.quit()
+	} else {
+		throw new Error(text);
+	}
 };
 
 export const getExternalCommand = () => {

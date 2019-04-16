@@ -13,7 +13,7 @@ const routes = [
     component: Frontend,
     children: [
       { path: '/', component: Home },
-      { name: 'multiplayer', path: '/multiplier', component: Multiplayer },
+      { name: 'multiplayer', path: '/multiplayer', component: Multiplayer },
       { name: 'singleplayer', path: '/singleplayer', component: Singleplayer },
       { name: 'setup', path: '/setup', component: SetupGame }
     ]

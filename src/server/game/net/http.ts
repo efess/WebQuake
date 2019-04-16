@@ -111,6 +111,29 @@ const onRequest = (request, response) => {
       response.write("Method not allowed")
       response.end();
     }
+  } else if (pathParams[1] === 'mastervalidate') {
+    if (request.method === 'POST') {
+      response.statusCode = 400;
+      response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+			request.on('data', (data) => {
+				const str = data.toString('ascii')
+				const obj = JSON.parse(str)
+				if (obj.id === host.state.serverId) {
+					response.statusCode = 200;
+					response.write(JSON.stringify({message: "OK"}))
+				} else {
+					response.write(JSON.stringify({message: "Invalid ID"}))
+				}
+			})			
+			request.on('end', () => {
+				response.end();
+			})
+      return
+    } else {
+      response.statusCode = 405;
+      response.write("Method not allowed")
+      response.end();
+    }
   } else if (pathParams[1] === 'rcon') {
     var data;
     try {
