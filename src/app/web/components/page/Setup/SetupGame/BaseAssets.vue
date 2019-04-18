@@ -22,7 +22,7 @@
 
 <script>
 import Asset from './Asset.vue'
-import {isId1Pak1} from '../../../helpers/assetChecker'
+import {isId1Pak1} from '../../../../helpers/assetChecker'
 
 export default {
   props: {

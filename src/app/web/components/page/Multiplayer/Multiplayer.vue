@@ -5,7 +5,8 @@
         th Name
         th Connection
         th Location
-        th Game
+        th Map
+        th Players
         th Ping
         th 
       tbody
@@ -13,7 +14,8 @@
           td {{server.name}}
           td {{server.connecthostport}}
           td {{server.location}}
-          td {{server.game}}
+          td {{server.map}}
+          td {{formatPlayerCount(server)}}
           td {{server.ping}}
           td
             button.btn(@click="join(server)") Join
@@ -35,6 +37,9 @@ export default {
     ...mapMutations('multiplayer', ['setAutoRefreshOff', 'setAutoRefreshOn']),
     join(server) {
       this.$router.push({name: 'quake', params: {server}})
+    },
+    formatPlayerCount (server) {
+      return `${server.players.length}/${server.maxPlayers}`
     }
   },
   beforeRouteEnter (to, from, next) {

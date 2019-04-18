@@ -17,7 +17,6 @@
           "cwd": "${workspaceFolder}",
           "protocol": "inspector",
           "args": [
-            "-game", "dm",
             "-port", "26001"
           ],
           "outFiles": [

@@ -291,7 +291,7 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 		if (volume > 1.0)
 			volume = 1.0;
 		target_chan.audio.volume = volume * cvr.volume.value;
-		await target_chan.audio.play();
+		await target_chan.audio.play().catch(() => {});
 	}
 };
 
@@ -518,7 +518,7 @@ export const updateAmbientSounds = async function()
 			sc = ch.sfx.cache;
 			if (ch.audio.paused === true)
 			{
-				await ch.audio.play();
+				await ch.audio.play().catch(() => {});
 				ch.end = host.state.realtime + sc.length;
 				continue;
 			}
@@ -659,7 +659,7 @@ export const updateStaticSounds = async function()
 			sc = ch.sfx.cache;
 			if (ch.audio.paused === true)
 			{
-				await ch.audio.play();
+				await ch.audio.play().catch(() => {});
 				ch.end = host.state.realtime + sc.length;
 				continue;
 			}

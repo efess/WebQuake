@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {getAllMeta} from '../../../helpers/indexeddb'
+import {getAllMeta} from '../../../../helpers/indexeddb'
 import {groupBy, keys} from 'ramda'
 
 export default {

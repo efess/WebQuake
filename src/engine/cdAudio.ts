@@ -21,7 +21,7 @@ export const play = async function(track, looping)
     {
       state.cd.loop = looping;
       if ((looping === true) && (state.cd.paused === true))
-        await state.cd.play();
+        await state.cd.play().catch(() => {});
     }
     return;
   }
@@ -35,7 +35,7 @@ export const play = async function(track, looping)
   state.cd = new Audio(known[track]);
   state.cd.loop = looping;
   state.cd.volume = state.cdvolume;
-  await state.cd.play();
+  await state.cd.play().catch(() => {});
 };
 
 export const stop = function()
@@ -61,7 +61,7 @@ export const resume = async function()
   if ((state.initialized !== true) || (state.enabled !== true))
     return;
   if (state.cd != null)
-    await state.cd.play()
+    await state.cd.play().catch(() => {});
 };
 
 export const cd_f = async function()

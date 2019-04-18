@@ -1,6 +1,6 @@
 <template lang="pug">
   .config
-    label.form-label Quake Configuration
+    label.form-label Quake config.cfg File
     textarea(placeholder="Textarea" rows="20" cols="80" :value="getConfigFile" @input="saveConfig($event.target.value)")
 </template>
 

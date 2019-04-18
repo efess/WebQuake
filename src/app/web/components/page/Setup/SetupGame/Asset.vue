@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { readPackFile } from '../../../helpers/assetChecker'
+import { readPackFile } from '../../../../helpers/assetChecker'
 import {mapActions} from 'vuex'
 
 const readFile = file => {
