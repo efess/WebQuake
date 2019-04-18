@@ -25,8 +25,7 @@ const listener_up = [0.0, 0.0, 0.0];
 let known_sfx = [];
 export const cvr = {} as any
 
-export const init = async function()
-{
+export const init = async function () {
 	state = {}
 	known_sfx = []
 	channels = []
@@ -36,7 +35,7 @@ export const init = async function()
 	cmd.addCommand('playvol', playVol);
 	cmd.addCommand('stopsound', stopAllSounds);
 	cmd.addCommand('soundlist', soundList);
-  cvr.nosound = cvar.registerVariable('nosound', (com.checkParm('-nosound') != null) ? '1' : '0');
+	cvr.nosound = cvar.registerVariable('nosound', (com.checkParm('-nosound') != null) ? '1' : '0');
 	cvr.volume = cvar.registerVariable('volume', '0.7', true);
 	cvr.precache = cvar.registerVariable('precache', '1');
 	cvr.bgmvolume = cvar.registerVariable('bgmvolume', '1', true);
@@ -50,19 +49,16 @@ export const init = async function()
 		S.context = new webkitAudioContext(); */
 
 	var i, ambient_sfx = ['water1', 'wind2'], ch, nodes;
-	for (i = 0; i < ambient_sfx.length; ++i)
-	{
-		ch = {sfx: await precacheSound('ambience/' + ambient_sfx[i] + '.wav'), end: 0.0, master_vol: 0.0};
+	for (i = 0; i < ambient_sfx.length; ++i) {
+		ch = { sfx: await precacheSound('ambience/' + ambient_sfx[i] + '.wav'), end: 0.0, master_vol: 0.0 };
 		ambient_channels[i] = ch;
 		if (await loadSound(ch.sfx) !== true)
 			continue;
-		if (ch.sfx.cache.loopstart == null)
-		{
+		if (ch.sfx.cache.loopstart == null) {
 			con.print('Sound ambience/' + ch.sfx.name + '.wav not looped\n');
 			continue;
 		}
-		if (context != null)
-		{
+		if (context != null) {
 			nodes = {
 				source: context.createBufferSource(),
 				gain: context.createGainNode()
@@ -82,38 +78,30 @@ export const init = async function()
 	con.state.sfx_talk = precacheSound('misc/talk.wav');
 };
 
-export const noteOff = function(node)
-{
-	if ((node.playbackState === 1) || (node.playbackState === 2))
-	{
-		try { node.noteOff(0.0); } catch (e) {}
+export const noteOff = function (node) {
+	if ((node.playbackState === 1) || (node.playbackState === 2)) {
+		try { node.noteOff(0.0); } catch (e) { }
 	}
 }
 
-export const noteOn = function(node)
-{
-	if ((node.playbackState === 0) || (node.playbackState === 3))
-	{
-		try { node.noteOn(0.0); } catch (e) {}
+export const noteOn = function (node) {
+	if ((node.playbackState === 0) || (node.playbackState === 3)) {
+		try { node.noteOn(0.0); } catch (e) { }
 	}
 }
 
-export const precacheSound = async function(name)
-{
+export const precacheSound = async function (name) {
 	if (cvr.nosound.value !== 0)
 		return;
 	var i, sfx;
-	for (i = 0; i < known_sfx.length; ++i)
-	{
-		if (known_sfx[i].name === name)
-		{
+	for (i = 0; i < known_sfx.length; ++i) {
+		if (known_sfx[i].name === name) {
 			sfx = known_sfx[i];
 			break;
 		}
 	}
-	if (i === known_sfx.length)
-	{
-		known_sfx[i] = {name: name};
+	if (i === known_sfx.length) {
+		known_sfx[i] = { name: name };
 		sfx = known_sfx[i];
 	}
 	if (cvr.precache.value !== 0)
@@ -121,27 +109,21 @@ export const precacheSound = async function(name)
 	return sfx;
 };
 
-export const pickChannel = function(entnum, entchannel)
-{
+export const pickChannel = function (entnum, entchannel) {
 	var i, channel;
 
-	if (entchannel !== 0)
-	{
-		for (i = 0; i < channels.length; ++i)
-		{
+	if (entchannel !== 0) {
+		for (i = 0; i < channels.length; ++i) {
 			channel = channels[i];
 			if (channel == null)
 				continue;
-			if ((channel.entnum === entnum) && ((channel.entchannel === entchannel) || (entchannel === -1)))
-			{
+			if ((channel.entnum === entnum) && ((channel.entchannel === entchannel) || (entchannel === -1))) {
 				channel.sfx = null;
-				if (channel.nodes != null)
-				{
+				if (channel.nodes != null) {
 					noteOff(channel.nodes.source);
 					channel.nodes = null;
 				}
-				else if (channel.audio != null)
-				{
+				else if (channel.audio != null) {
 					channel.audio.pause();
 					channel.audio = null;
 				}
@@ -150,10 +132,8 @@ export const pickChannel = function(entnum, entchannel)
 		}
 	}
 
-	if ((entchannel === 0) || (i === channels.length))
-	{
-		for (i = 0; i < channels.length; ++i)
-		{
+	if ((entchannel === 0) || (i === channels.length)) {
+		for (i = 0; i < channels.length; ++i) {
 			channel = channels[i];
 			if (channel == null)
 				break;
@@ -162,18 +142,15 @@ export const pickChannel = function(entnum, entchannel)
 		}
 	}
 
-	if (i === channels.length)
-	{
-		channels[i] = {end: 0.0};
+	if (i === channels.length) {
+		channels[i] = { end: 0.0 };
 		return channels[i];
 	}
 	return channel;
 };
 
-export const spatialize = function(ch)
-{
-	if (ch.entnum === cl.clState.viewentity)
-	{
+export const spatialize = function (ch) {
+	if (ch.entnum === cl.clState.viewentity) {
 		ch.leftvol = ch.master_vol;
 		ch.rightvol = ch.master_vol;
 		return;
@@ -185,8 +162,7 @@ export const spatialize = function(ch)
 		ch.origin[2] - listener_origin[2]
 	];
 	var dist = Math.sqrt(source[0] * source[0] + source[1] * source[1] + source[2] * source[2]);
-	if (dist !== 0.0)
-	{
+	if (dist !== 0.0) {
 		source[0] /= dist;
 		source[1] /= dist;
 		source[2] /= dist;
@@ -204,8 +180,7 @@ export const spatialize = function(ch)
 		ch.leftvol = 0.0;
 };
 
-export const startSound = async function(entnum, entchannel, sfx, origin, vol, attenuation)
-{
+export const startSound = async function (entnum, entchannel, sfx, origin, vol, attenuation) {
 	if ((cvr.nosound.value !== 0) || (sfx == null))
 		return;
 
@@ -219,8 +194,7 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 	if ((target_chan.leftvol === 0.0) && (target_chan.rightvol === 0.0))
 		return;
 
-	if (await loadSound(sfx) !== true)
-	{
+	if (await loadSound(sfx) !== true) {
 		target_chan.sfx = null;
 		return;
 	}
@@ -229,8 +203,7 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 	target_chan.pos = 0.0;
 	target_chan.end = host.state.realtime + sfx.cache.length;
 	var volume;
-	if (context != null)
-	{
+	if (context != null) {
 		var nodes = {
 			source: context.createBufferSource(),
 			merger1: context.createChannelMerger(2),
@@ -241,8 +214,7 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 		};
 		target_chan.nodes = nodes;
 		nodes.source.buffer = sfx.cache.data;
-		if (sfx.cache.loopstart != null)
-		{
+		if (sfx.cache.loopstart != null) {
 			nodes.source.loop = true;
 			nodes.source.loopStart = sfx.cache.loopstart;
 			nodes.source.loopEnd = nodes.source.buffer.length;
@@ -264,16 +236,14 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 		nodes.gain1.connect(nodes.merger2, 0, 1);
 		nodes.merger2.connect(context.destination);
 		var i, check, skip;
-		for (i = 0; i < channels.length; ++i)
-		{
+		for (i = 0; i < channels.length; ++i) {
 			check = channels[i];
 			if (check === target_chan)
 				continue;
 			if ((check.sfx !== sfx) || (check.pos !== 0.0))
 				continue;
 			skip = Math.random() * 0.1;
-			if (skip >= sfx.cache.length)
-			{
+			if (skip >= sfx.cache.length) {
 				noteOn(nodes.source);
 				break;
 			}
@@ -284,38 +254,32 @@ export const startSound = async function(entnum, entchannel, sfx, origin, vol, a
 		}
 		noteOn(nodes.source);
 	}
-	else
-	{
+	else {
 		target_chan.audio = sfx.cache.data.cloneNode();
 		volume = (target_chan.leftvol + target_chan.rightvol) * 0.5;
 		if (volume > 1.0)
 			volume = 1.0;
 		target_chan.audio.volume = volume * cvr.volume.value;
-		await target_chan.audio.play().catch(() => {});
+		await target_chan.audio.play().catch(() => { });
 	}
 };
 
-export const stopSound = function(entnum, entchannel)
-{
+export const stopSound = function (entnum, entchannel) {
 	if (cvr.nosound.value !== 0)
 		return;
 	var i, ch;
-	for (i = 0; i < channels.length; ++i)
-	{
+	for (i = 0; i < channels.length; ++i) {
 		ch = channels[i];
 		if (ch == null)
 			continue;
-		if ((ch.entnum === entnum) && (ch.entchannel === entchannel))
-		{
+		if ((ch.entnum === entnum) && (ch.entchannel === entchannel)) {
 			ch.end = 0.0;
 			ch.sfx = null;
-			if (ch.nodes != null)
-			{
+			if (ch.nodes != null) {
 				noteOff(ch.nodes.source);
 				ch.nodes = null;
 			}
-			else if (ch.audio != null)
-			{
+			else if (ch.audio != null) {
 				ch.audio.pause();
 				ch.audio = null;
 			}
@@ -324,15 +288,13 @@ export const stopSound = function(entnum, entchannel)
 	}
 };
 
-export const stopAllSounds = function()
-{
+export const stopAllSounds = function () {
 	if (cvr.nosound.value !== 0)
 		return;
 
 	var i, ch;
 
-	for (i = 0; i < ambient_channels.length; ++i)
-	{
+	for (i = 0; i < ambient_channels.length; ++i) {
 		ch = ambient_channels[i];
 		ch.master_vol = 0.0;
 		if (ch.nodes != null)
@@ -341,8 +303,7 @@ export const stopAllSounds = function()
 			ch.audio.pause();
 	}
 
-	for (i = 0; i < channels.length; ++i)
-	{
+	for (i = 0; i < channels.length; ++i) {
 		ch = channels[i];
 		if (ch == null)
 			continue;
@@ -353,27 +314,23 @@ export const stopAllSounds = function()
 	}
 	channels = [];
 
-	if (context != null)
-	{
+	if (context != null) {
 		for (i = 0; i < static_channels.length; ++i)
-		  noteOff(static_channels[i].nodes.source);
+			noteOff(static_channels[i].nodes.source);
 	}
-	else
-	{
+	else {
 		for (i = 0; i < static_channels.length; ++i)
 			static_channels[i].audio.pause();
 	}
 	static_channels = [];
 };
 
-export const staticSound = async function(sfx, origin, vol, attenuation)
-{
+export const staticSound = async function (sfx, origin, vol, attenuation) {
 	if ((cvr.nosound.value !== 0) || (sfx == null))
 		return;
 	if (await loadSound(sfx) !== true)
 		return;
-	if (sfx.cache.loopstart == null)
-	{
+	if (sfx.cache.loopstart == null) {
 		con.print('Sound ' + sfx.name + ' not looped\n');
 		return;
 	}
@@ -385,8 +342,7 @@ export const staticSound = async function(sfx, origin, vol, attenuation)
 		end: host.state.realtime + sfx.cache.length
 	} as any;
 	static_channels[static_channels.length] = ss;
-	if (context != null)
-	{
+	if (context != null) {
 		var nodes = {
 			source: context.createBufferSource(),
 			merger1: context.createChannelMerger(2),
@@ -409,25 +365,22 @@ export const staticSound = async function(sfx, origin, vol, attenuation)
 		nodes.gain1.connect(nodes.merger2, 0, 1);
 		nodes.merger2.connect(context.destination);
 	}
-	else
-	{
+	else {
 		ss.audio = sfx.cache.data.cloneNode();
 		ss.audio.pause();
 	}
 };
 
-export const soundList = function()
-{
+export const soundList = function () {
 	var total = 0, i, sfx, sc, size;
-	for (i = 0; i < known_sfx.length; ++i)
-	{
+	for (i = 0; i < known_sfx.length; ++i) {
 		sfx = known_sfx[i];
 		sc = sfx.cache;
 		if (sc == null)
 			continue;
 		size = sc.size.toString();
 		total += sc.size;
-		for (; size.length <= 5; )
+		for (; size.length <= 5;)
 			size = ' ' + size;
 		if (sc.loopstart != null)
 			size = 'L' + size;
@@ -438,31 +391,25 @@ export const soundList = function()
 	con.print('Total resident: ' + total + '\n');
 };
 
-export const localSound = async function(sound)
-{
+export const localSound = async function (sound) {
 	await startSound(cl.clState.viewentity, -1, sound, vec.origin, 1.0, 1.0);
 };
 
-export const updateAmbientSounds = async function()
-{
+export const updateAmbientSounds = async function () {
 	if (cl.clState.worldmodel == null)
 		return;
 
 	var i, ch, vol, sc;
 
 	var l = mod.pointInLeaf(listener_origin, cl.clState.worldmodel);
-	if ((l == null) || (cvr.ambient_level.value === 0))
-	{
-		for (i = 0; i < ambient_channels.length; ++i)
-		{
+	if ((l == null) || (cvr.ambient_level.value === 0)) {
+		for (i = 0; i < ambient_channels.length; ++i) {
 			ch = ambient_channels[i];
 			ch.master_vol = 0.0;
-			if (ch.nodes != null)
-			{
+			if (ch.nodes != null) {
 				noteOff(ch.nodes.source);
 			}
-			else if (ch.audio != null)
-			{
+			else if (ch.audio != null) {
 				if (ch.audio.paused !== true)
 					ch.audio.pause();
 			}
@@ -470,8 +417,7 @@ export const updateAmbientSounds = async function()
 		return;
 	}
 
-	for (i = 0; i < ambient_channels.length; ++i)
-	{
+	for (i = 0; i < ambient_channels.length; ++i) {
 		ch = ambient_channels[i];
 		if ((ch.nodes == null) && (ch.audio == null))
 			continue;
@@ -479,27 +425,22 @@ export const updateAmbientSounds = async function()
 		if (vol < 8.0)
 			vol = 0.0;
 		vol /= 255.0;
-		if (ch.master_vol < vol)
-		{
+		if (ch.master_vol < vol) {
 			ch.master_vol += (host.state.frametime * cvr.ambient_fade.value) / 255.0;
 			if (ch.master_vol > vol)
 				ch.master_vol = vol;
 		}
-		else if (ch.master_vol > vol)
-		{
+		else if (ch.master_vol > vol) {
 			ch.master_vol -= (host.state.frametime * cvr.ambient_fade.value) / 255.0;
 			if (ch.master_vol < vol)
 				ch.master_vol = vol;
 		}
 
-		if (ch.master_vol === 0.0)
-		{
-			if (context != null)
-			{
+		if (ch.master_vol === 0.0) {
+			if (context != null) {
 				noteOff(ch.nodes.source);
 			}
-			else
-			{
+			else {
 				if (ch.audio.paused !== true)
 					await ch.audio.pause();
 			}
@@ -507,29 +448,23 @@ export const updateAmbientSounds = async function()
 		}
 		if (ch.master_vol > 1.0)
 			ch.master_vol = 1.0;
-		if (context != null)
-		{
+		if (context != null) {
 			ch.nodes.gain.gain.value = ch.master_vol * cvr.volume.value;
 			noteOn(ch.nodes.source);
 		}
-		else
-		{
+		else {
 			ch.audio.volume = ch.master_vol * cvr.volume.value;
 			sc = ch.sfx.cache;
-			if (ch.audio.paused === true)
-			{
-				await ch.audio.play().catch(() => {});
+			if (ch.audio.paused === true) {
+				await ch.audio.play().catch(() => { });
 				ch.end = host.state.realtime + sc.length;
 				continue;
 			}
-			if (host.state.realtime >= ch.end)
-			{
-				try
-				{
+			if (host.state.realtime >= ch.end) {
+				try {
 					ch.audio.currentTime = sc.loopstart;
 				}
-				catch (e)
-				{
+				catch (e) {
 					ch.end = host.state.realtime;
 					continue;
 				}
@@ -539,37 +474,29 @@ export const updateAmbientSounds = async function()
 	}
 };
 
-export const updateDynamicSounds = function()
-{
+export const updateDynamicSounds = function () {
 	var i, ch, sc, volume;
-	for (i = 0; i < channels.length; ++i)
-	{
+	for (i = 0; i < channels.length; ++i) {
 		ch = channels[i];
 		if (ch == null)
 			continue;
 		if (ch.sfx == null)
 			continue;
-		if (host.state.realtime >= ch.end)
-		{
+		if (host.state.realtime >= ch.end) {
 			sc = ch.sfx.cache;
-			if (sc.loopstart != null)
-			{
-				if (context == null)
-				{
-					try
-					{
+			if (sc.loopstart != null) {
+				if (context == null) {
+					try {
 						ch.audio.currentTime = sc.loopstart;
 					}
-					catch (e)
-					{
+					catch (e) {
 						ch.end = host.state.realtime;
 						continue;
 					}
 				}
 				ch.end = host.state.realtime + sc.length - sc.loopstart;
 			}
-			else
-			{
+			else {
 				ch.sfx = null;
 				ch.nodes = null;
 				ch.audio = null;
@@ -577,8 +504,7 @@ export const updateDynamicSounds = function()
 			}
 		}
 		spatialize(ch);
-		if (context != null)
-		{
+		if (context != null) {
 			if (ch.leftvol > 1.0)
 				ch.leftvol = 1.0;
 			if (ch.rightvol > 1.0)
@@ -586,8 +512,7 @@ export const updateDynamicSounds = function()
 			ch.nodes.gain0.gain.volume = ch.leftvol * cvr.volume.value;
 			ch.nodes.gain1.gain.volume = ch.rightvol * cvr.volume.value;
 		}
-		else
-		{
+		else {
 			volume = (ch.leftvol + ch.rightvol) * 0.5;
 			if (volume > 1.0)
 				volume = 1.0;
@@ -596,24 +521,20 @@ export const updateDynamicSounds = function()
 	}
 };
 
-export const updateStaticSounds = async function()
-{
+export const updateStaticSounds = async function () {
 	var i, j, ch, ch2, sfx, sc, volume;
 
 	for (i = 0; i < static_channels.length; ++i)
 		spatialize(static_channels[i]);
 
-	for (i = 0; i < static_channels.length; ++i)
-	{
+	for (i = 0; i < static_channels.length; ++i) {
 		ch = static_channels[i];
 		if ((ch.leftvol === 0.0) && (ch.rightvol === 0.0))
 			continue;
 		sfx = ch.sfx;
-		for (j = i + 1; j < static_channels.length; ++j)
-		{
+		for (j = i + 1; j < static_channels.length; ++j) {
 			ch2 = static_channels[j];
-			if (sfx === ch2.sfx)
-			{
+			if (sfx === ch2.sfx) {
 				ch.leftvol += ch2.leftvol;
 				ch.rightvol += ch2.rightvol;
 				ch2.leftvol = 0.0;
@@ -622,14 +543,11 @@ export const updateStaticSounds = async function()
 		}
 	}
 
-	if (context != null)
-	{
-		for (i = 0; i < static_channels.length; ++i)
-		{
+	if (context != null) {
+		for (i = 0; i < static_channels.length; ++i) {
 			ch = static_channels[i];
-			if ((ch.leftvol === 0.0) && (ch.rightvol === 0.0))
-			{
-			  noteOff(ch.nodes.source);
+			if ((ch.leftvol === 0.0) && (ch.rightvol === 0.0)) {
+				noteOff(ch.nodes.source);
 				continue;
 			}
 			if (ch.leftvol > 1.0)
@@ -641,36 +559,29 @@ export const updateStaticSounds = async function()
 			noteOn(ch.nodes.source);
 		}
 	}
-	else
-	{
-		for (i = 0; i < static_channels.length; ++i)
-		{
+	else {
+		for (i = 0; i < static_channels.length; ++i) {
 			ch = static_channels[i];
 			volume = (ch.leftvol + ch.rightvol) * 0.5;
 			if (volume > 1.0)
 				volume = 1.0;
-			if (volume === 0.0)
-			{
+			if (volume === 0.0) {
 				if (ch.audio.paused !== true)
 					ch.audio.pause();
 				continue;
 			}
 			ch.audio.volume = volume * cvr.volume.value;
 			sc = ch.sfx.cache;
-			if (ch.audio.paused === true)
-			{
-				await ch.audio.play().catch(() => {});
+			if (ch.audio.paused === true) {
+				await ch.audio.play().catch(() => { });
 				ch.end = host.state.realtime + sc.length;
 				continue;
 			}
-			if (host.state.realtime >= ch.end)
-			{
-				try
-				{
+			if (host.state.realtime >= ch.end) {
+				try {
 					ch.audio.currentTime = sc.loopstart;
 				}
-				catch (e)
-				{
+				catch (e) {
 					ch.end = host.state.realtime;
 					continue;
 				}
@@ -679,8 +590,7 @@ export const updateStaticSounds = async function()
 	}
 };
 
-export const update = async function(origin, forward, right, up)
-{
+export const update = async function (origin, forward, right, up) {
 	if (cvr.nosound.value !== 0)
 		return;
 
@@ -707,34 +617,29 @@ export const update = async function(origin, forward, right, up)
 	await updateStaticSounds();
 };
 
-export const play = async function()
-{
+export const play = async function () {
 	if (cvr.nosound.value !== 0)
 		return;
 	var i, sfx;
-	for (i = 1; i < cmd.state.argv.length; ++i)
-	{
+	for (i = 1; i < cmd.state.argv.length; ++i) {
 		sfx = await precacheSound(com.defaultExtension(cmd.state.argv[i], '.wav'));
 		if (sfx != null)
 			await startSound(cl.clState.viewentity, 0, sfx, listener_origin, 1.0, 1.0);
 	}
 };
 
-export const playVol = async function()
-{
+export const playVol = async function () {
 	if (cvr.nosound.value !== 0)
 		return;
 	var i, sfx;
-	for (i = 1; i < cmd.state.argv.length; i += 2)
-	{
+	for (i = 1; i < cmd.state.argv.length; i += 2) {
 		sfx = await precacheSound(com.defaultExtension(cmd.state.argv[i], '.wav'));
 		if (sfx != null)
 			await startSound(cl.clState.viewentity, 0, sfx, listener_origin, q.atof(cmd.state.argv[i + 1]), 1.0);
 	}
 };
 
-export const loadSound = async function(s)
-{
+export const loadSound = async function (s) {
 	if (cvr.nosound.value !== 0)
 		return;
 	if (s.cache != null)
@@ -743,65 +648,58 @@ export const loadSound = async function(s)
 	var sc = {} as any
 
 	var data = await com.loadFile('sound/' + s.name);
-	if (data == null)
-	{
+	if (data == null) {
 		con.print('Couldn\'t load sound/' + s.name + '\n');
 		return;
 	}
 
 	var view = new DataView(data);
-	if ((view.getUint32(0, true) !== 0x46464952) || (view.getUint32(8, true) !== 0x45564157))
-	{
+	if ((view.getUint32(0, true) !== 0x46464952) || (view.getUint32(8, true) !== 0x45564157)) {
 		con.print('Missing RIFF/WAVE chunks\n');
 		return;
 	}
 	var p, fmt, dataofs, datalen, cue, loopstart, samples;
-	for (p = 12; p < data.byteLength; )
-	{
-		switch (view.getUint32(p, true))
-		{
-		case 0x20746d66: // fmt
-			if (view.getInt16(p + 8, true) !== 1)
-			{
-				con.print('Microsoft PCM format only\n');
-				return;
-			}
-			fmt = {
-				channels: view.getUint16(p + 10, true),
-				samplesPerSec: view.getUint32(p + 12, true),
-				avgBytesPerSec: view.getUint32(p + 16, true),
-				blockAlign: view.getUint16(p + 20, true),
-				bitsPerSample: view.getUint16(p + 22, true)
-			};
-			break;
-		case 0x61746164: // data
-			dataofs = p + 8;
-			datalen = view.getUint32(p + 4, true);
-			break;
-		case 0x20657563: // cue
-			cue = true;
-			loopstart = view.getUint32(p + 32, true);
-			break;
-		case 0x5453494c: // LIST
-			if (cue !== true)
+	for (p = 12; p < data.byteLength;) {
+		switch (view.getUint32(p, true)) {
+			case 0x20746d66: // fmt
+				if (view.getInt16(p + 8, true) !== 1) {
+					con.print('Microsoft PCM format only\n');
+					return;
+				}
+				fmt = {
+					channels: view.getUint16(p + 10, true),
+					samplesPerSec: view.getUint32(p + 12, true),
+					avgBytesPerSec: view.getUint32(p + 16, true),
+					blockAlign: view.getUint16(p + 20, true),
+					bitsPerSample: view.getUint16(p + 22, true)
+				};
 				break;
-			cue = false;
-			if (view.getUint32(p + 28, true) === 0x6b72616d)
-				samples = loopstart + view.getUint32(p + 24, true);
-			break;
+			case 0x61746164: // data
+				dataofs = p + 8;
+				datalen = view.getUint32(p + 4, true);
+				break;
+			case 0x20657563: // cue
+				cue = true;
+				loopstart = view.getUint32(p + 32, true);
+				break;
+			case 0x5453494c: // LIST
+				if (cue !== true)
+					break;
+				cue = false;
+				if (view.getUint32(p + 28, true) === 0x6b72616d)
+					samples = loopstart + view.getUint32(p + 24, true);
+				break;
 		}
 		p += view.getUint32(p + 4, true) + 8;
 		if ((p & 1) !== 0)
 			++p;
 	}
 
-	if (fmt == null)
-	{
+	if (fmt == null) {
 		con.print('Missing fmt chunk\n');
 		return;
 	}
-	if (dataofs == null)
-	{
+	if (dataofs == null) {
 		con.print('Missing data chunk\n');
 		return;
 	}

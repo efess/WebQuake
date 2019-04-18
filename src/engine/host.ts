@@ -188,7 +188,7 @@ const serverFrame = async function()
 
 export const remoteCommand = function(from, data, password)
 {
-	if ((state.cvr.rcon_password.string.length === 0) || (password !== state.cvr.rcon_password.string))
+	if ((cvr.rcon_password.string.length === 0) || (password !== cvr.rcon_password.string))
 	{
 		con.print('Bad rcon from ' + from + ':\n' + data + '\n');
 		return;
