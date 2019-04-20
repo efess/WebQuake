@@ -43,8 +43,6 @@ const pingServer = (hostport) => {
     })
 }
 
-let setTimeoutId = 0
-
 const actions = {
   loadServerStatuses ({commit}) {
     return axios.get(masterServerUrl)
@@ -75,7 +73,7 @@ const actions = {
     return dispatch('loadServerStatuses')
       .then(() => dispatch('pingAllServers'))
   },
-  refreshLoop ({dispatch}) {
+  refreshLoop ({dispatch, getters}) {
     return dispatch('refresh')
       .then(() => {
         setTimeout(() => {
